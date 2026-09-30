@@ -21,11 +21,16 @@ public final class NeverAloneClient implements ClientModInitializer {
         NeverAlone.id("textures/gui/scare_1.png"),
         NeverAlone.id("textures/gui/scare_2.png"),
         NeverAlone.id("textures/gui/scare_3.png"),
-        NeverAlone.id("textures/gui/scare_4.png")
+        NeverAlone.id("textures/gui/scare_4.png"),
+        NeverAlone.id("textures/gui/scare_5.png"),
+        NeverAlone.id("textures/gui/scare_6.png"),
+        NeverAlone.id("textures/gui/scare_7.png"),
+        NeverAlone.id("textures/gui/scare_8.png")
     };
 
     private static final SoundEvent[] SOUNDS = {
-        NeverAlone.SCARE_1, NeverAlone.SCARE_2, NeverAlone.SCARE_3, NeverAlone.SCARE_4
+        NeverAlone.SCARE_1, NeverAlone.SCARE_2, NeverAlone.SCARE_3, NeverAlone.SCARE_4,
+        NeverAlone.SCARE_5, NeverAlone.SCARE_6, NeverAlone.SCARE_7, NeverAlone.SCARE_8
     };
 
     private int ticksUntilScare;
