@@ -96,7 +96,7 @@ def make_sound(index, seed):
     subprocess.run(["ffmpeg","-y","-loglevel","error","-i",str(wav_path),"-c:a","libvorbis","-q:a","4",str(ogg)],check=True)
     wav_path.unlink()
 
-for i, seed in enumerate((1701, 2819, 3947, 5099), start=1):
+for i, seed in enumerate((1701, 2819, 3947, 5099, 6173, 7283, 8399, 9461), start=1):
     make_face(i, seed)
     make_sound(i, seed)
 
