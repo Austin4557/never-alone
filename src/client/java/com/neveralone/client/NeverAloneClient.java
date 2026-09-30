@@ -50,7 +50,7 @@ public final class NeverAloneClient implements ClientModInitializer {
 
     private void tick(Minecraft client) {
         boolean playable = client.player != null && client.level != null
-            && client.screen == null && !client.isPaused();
+            && client.getScreen() == null && !client.isPaused();
         if (!playable) { wasInWorld = false; return; }
         if (!wasInWorld) { wasInWorld = true; return; }
         if (scareTicks > 0) { scareTicks--; return; }
