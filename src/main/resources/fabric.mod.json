@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "never_alone",
+  "version": "${version}",
+  "name": "Never Alone",
+  "description": "Unpredictable client-side horror jumpscares for Minecraft.",
+  "authors": ["Austin & ChatGPT"],
+  "environment": "client",
+  "entrypoints": {
+    "main": ["com.neveralone.NeverAlone"],
+    "client": ["com.neveralone.client.NeverAloneClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.2",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
