@@ -1,0 +1,6 @@
+{
+  "scare_1": {"sounds": [{"name": "never_alone:scare_1", "stream": false}]},
+  "scare_2": {"sounds": [{"name": "never_alone:scare_2", "stream": false}]},
+  "scare_3": {"sounds": [{"name": "never_alone:scare_3", "stream": false}]},
+  "scare_4": {"sounds": [{"name": "never_alone:scare_4", "stream": false}]}
+}
