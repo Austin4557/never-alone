@@ -69,7 +69,7 @@ public final class NeverAloneClient implements ClientModInitializer {
         } while (IMAGES.length > 1 && scareIndex == previous);
         scareTicks = ThreadLocalRandom.current().nextInt(11, 19);
         float pitch = ThreadLocalRandom.current().nextFloat(0.92F, 1.09F);
-        client.getSoundManager().play(SimpleSoundInstance.forUI(SOUNDS[scareIndex], pitch, 1.0F));
+        client.getSoundManager().play(SimpleSoundInstance.forUI(SOUNDS[scareIndex], pitch, 1.75F));
         resetTimer();
     }
 
