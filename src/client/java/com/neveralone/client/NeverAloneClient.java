@@ -5,7 +5,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.EntityType;
+import com.neveralone.client.cats.FourCatRenderer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.resources.Identifier;
@@ -47,6 +50,8 @@ public final class NeverAloneClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        EntityRendererRegistry.register(EntityType.CAT, FourCatRenderer::new);
+
         ArmorRenderers.register(
             GeoArmorRenderer.of(
                 NeverAlone.id("geo/dark_amethyst.geo.json"),
