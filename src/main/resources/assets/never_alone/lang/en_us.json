@@ -1,1 +1,12 @@
-{"item.never_alone.dark_amethyst_crystal":"Dark Amethyst Crystal","item.never_alone.dark_amethyst_helmet":"Dark Amethyst Crown","item.never_alone.dark_amethyst_chestplate":"Dark Amethyst Chestplate","item.never_alone.dark_amethyst_leggings":"Dark Amethyst Leggings","item.never_alone.dark_amethyst_boots":"Dark Amethyst Boots"}
+{
+  "item.never_alone.dark_amethyst_crystal": "Dark Amethyst Crystal",
+  "item.never_alone.dark_amethyst_helmet": "Dark Amethyst Crown",
+  "item.never_alone.dark_amethyst_chestplate": "Dark Amethyst Chestplate",
+  "item.never_alone.dark_amethyst_leggings": "Dark Amethyst Leggings",
+  "item.never_alone.dark_amethyst_boots": "Dark Amethyst Boots",
+  "item.never_alone.radiant_rhinestone": "Radiant Rhinestone",
+  "item.never_alone.rhinestone_tiara": "Rhinestone Battle Tiara",
+  "item.never_alone.rhinestone_chestplate": "Rhinestone Heartplate",
+  "item.never_alone.rhinestone_leggings": "Rhinestone Leggings",
+  "item.never_alone.rhinestone_boots": "Rhinestone Boots"
+}
