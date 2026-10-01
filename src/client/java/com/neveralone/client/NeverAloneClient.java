@@ -12,6 +12,9 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 
 import com.neveralone.NeverAlone;
+import com.neveralone.armor.DarkAmethystItems;
+import net.rpg_foundation.armor_api.client.ArmorRenderers;
+import net.rpg_foundation.armor_api.client.GeoArmorRenderer;
 
 public final class NeverAloneClient implements ClientModInitializer {
     private static final int MIN_DELAY_TICKS = 12 * 60 * 20;
@@ -42,6 +45,16 @@ public final class NeverAloneClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        ArmorRenderers.register(
+            GeoArmorRenderer.of(
+                NeverAlone.id("geo/dark_amethyst.geo.json"),
+                NeverAlone.id("textures/armor/dark_amethyst.png"))
+                .radiant(),
+            DarkAmethystItems.DARK_AMETHYST_HELMET,
+            DarkAmethystItems.DARK_AMETHYST_CHESTPLATE,
+            DarkAmethystItems.DARK_AMETHYST_LEGGINGS,
+            DarkAmethystItems.DARK_AMETHYST_BOOTS);
+
         resetTimer();
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
         HudElementRegistry.addLast(NeverAlone.id("jumpscare"), (graphics, deltaTracker) -> {
