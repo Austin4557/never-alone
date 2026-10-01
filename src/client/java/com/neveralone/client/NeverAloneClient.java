@@ -36,6 +36,8 @@ public final class NeverAloneClient implements ClientModInitializer {
     private int ticksUntilScare;
     private int scareTicks;
     private int scareIndex;
+    private int delayedEchoTicks;
+    private int fakeOutTicks;
     private boolean wasInWorld;
 
     @Override
@@ -59,10 +61,25 @@ public final class NeverAloneClient implements ClientModInitializer {
         if (!playable) { wasInWorld = false; return; }
         if (!wasInWorld) { wasInWorld = true; return; }
         if (scareTicks > 0) { scareTicks--; return; }
+        if (delayedEchoTicks > 0 && --delayedEchoTicks == 0) {
+            scareTicks = ThreadLocalRandom.current().nextInt(3, 7);
+            client.getSoundManager().play(SimpleSoundInstance.forUI(SOUNDS[scareIndex], 1.18F, 0.72F));
+            return;
+        }
+        if (fakeOutTicks > 0) { fakeOutTicks--; return; }
         if (--ticksUntilScare <= 0) triggerScare(client);
     }
 
     private void triggerScare(Minecraft client) {
+        ThreadLocalRandom rng = ThreadLocalRandom.current();
+        // About one in six scheduled scares is a fake-out: a tiny ominous delay, then usually nothing.
+        if (rng.nextInt(100) < 16) {
+            fakeOutTicks = rng.nextInt(4, 10);
+            if (rng.nextInt(100) < 35) ticksUntilScare = rng.nextInt(20 * 10, 20 * 31);
+            else resetTimer();
+            return;
+        }
+
         int previous = scareIndex;
         do {
             scareIndex = ThreadLocalRandom.current().nextInt(IMAGES.length);
@@ -70,6 +87,8 @@ public final class NeverAloneClient implements ClientModInitializer {
         scareTicks = ThreadLocalRandom.current().nextInt(11, 19);
         float pitch = ThreadLocalRandom.current().nextFloat(0.92F, 1.09F);
         client.getSoundManager().play(SimpleSoundInstance.forUI(SOUNDS[scareIndex], pitch, 1.75F));
+        // Very rarely, the same face flashes back briefly after the player thinks the scare is over.
+        if (rng.nextInt(100) < 7) delayedEchoTicks = rng.nextInt(20 * 2, 20 * 6);
         resetTimer();
     }
 
