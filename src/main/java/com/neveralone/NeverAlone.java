@@ -2,6 +2,7 @@ package com.neveralone;
 
 import com.neveralone.armor.DarkAmethystItems;
 import com.neveralone.armor.RhinestoneItems;
+import com.neveralone.armor.EmeraldWardenItems;
 
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.resources.Identifier;
@@ -34,5 +35,6 @@ public final class NeverAlone implements ModInitializer {
     public void onInitialize() {
         DarkAmethystItems.initialize();
         RhinestoneItems.initialize();
+        EmeraldWardenItems.initialize();
     }
 }
