@@ -2,7 +2,7 @@ name: Build Never Alone
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "feature/dark-amethyst-armor" ]
   workflow_dispatch:
 
 jobs:
