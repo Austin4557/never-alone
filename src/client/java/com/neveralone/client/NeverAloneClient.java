@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundEvent;
 
 import com.neveralone.NeverAlone;
 import com.neveralone.armor.DarkAmethystItems;
+import com.neveralone.armor.RhinestoneItems;
 import net.rpg_foundation.armor_api.client.ArmorRenderers;
 import net.rpg_foundation.armor_api.client.GeoArmorRenderer;
 
@@ -54,6 +55,16 @@ public final class NeverAloneClient implements ClientModInitializer {
             DarkAmethystItems.DARK_AMETHYST_CHESTPLATE,
             DarkAmethystItems.DARK_AMETHYST_LEGGINGS,
             DarkAmethystItems.DARK_AMETHYST_BOOTS);
+
+        ArmorRenderers.register(
+            GeoArmorRenderer.of(
+                NeverAlone.id("geo/rhinestone.geo.json"),
+                NeverAlone.id("textures/armor/rhinestone.png"))
+                .glow(),
+            RhinestoneItems.RHINESTONE_TIARA,
+            RhinestoneItems.RHINESTONE_CHESTPLATE,
+            RhinestoneItems.RHINESTONE_LEGGINGS,
+            RhinestoneItems.RHINESTONE_BOOTS);
 
         resetTimer();
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
