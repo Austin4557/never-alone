@@ -1,5 +1,7 @@
 package com.neveralone;
 
+import com.neveralone.armor.DarkAmethystItems;
+
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
@@ -29,5 +31,6 @@ public final class NeverAlone implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        DarkAmethystItems.initialize();
     }
 }
