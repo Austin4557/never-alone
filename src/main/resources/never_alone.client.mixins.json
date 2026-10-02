@@ -3,7 +3,8 @@
   "package": "com.neveralone.mixin.client",
   "compatibilityLevel": "JAVA_25",
   "client": [
-    "AgeableMobRendererMixin"
+    "AgeableMobRendererMixin",
+    "ArmorGeoHighResMixin"
   ],
   "injectors": {
     "defaultRequire": 1
