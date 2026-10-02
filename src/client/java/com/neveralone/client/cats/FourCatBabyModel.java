@@ -30,14 +30,15 @@ public final class FourCatBabyModel extends BabyCatModel {
         head.yRot += Mth.sin(time * 0.065F + phase) * 0.13F;
         tail1.yRot += Mth.sin(time * 0.14F + phase) * 0.24F;
 
-        if (state.shouldMakeBiscuits()) {
+        float biscuitWeight = state.biscuitWeight();
+        if (biscuitWeight > 0.0F) {
             float knead = Mth.sin(time * 0.36F + phase);
             float left = Math.max(0.0F, knead);
             float right = Math.max(0.0F, -knead);
-            leftFrontLeg.xRot -= left * 0.24F;
-            rightFrontLeg.xRot -= right * 0.24F;
-            leftFrontLeg.y += left * 0.32F * state.ageScale;
-            rightFrontLeg.y += right * 0.32F * state.ageScale;
+            leftFrontLeg.xRot -= left * 0.24F * biscuitWeight;
+            rightFrontLeg.xRot -= right * 0.24F * biscuitWeight;
+            leftFrontLeg.y += left * 0.32F * state.ageScale * biscuitWeight;
+            rightFrontLeg.y += right * 0.32F * state.ageScale * biscuitWeight;
         }
     }
 }
