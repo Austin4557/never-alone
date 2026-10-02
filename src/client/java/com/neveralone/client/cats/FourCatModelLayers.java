@@ -59,15 +59,11 @@ public final class FourCatModelLayers {
     }
 
     public static LayerDefinition createKlouse() {
-        MeshDefinition mesh = AdultFelineModel.createBodyMesh(new CubeDeformation(0.34F));
+        MeshDefinition mesh = AdultFelineModel.createBodyMesh(new CubeDeformation(0.26F));
         PartDefinition root = mesh.getRoot();
-        // Klouse is not only wider: a body-length overlay extends his silhouette
-        // along the body's local Y axis (the adult body is rotated 90 degrees).
-        root.getChild("body").addOrReplaceChild("klouse_long_body",
-            CubeListBuilder.create().texOffs(32, 32).addBox(-2.35F, -0.7F, -2.9F, 4.7F, 17.4F, 6.2F, new CubeDeformation(0.10F)),
-            PartPose.ZERO);
+        // Long-haired chonk without a second full torso. Local fluff only.
         root.getChild("body").addOrReplaceChild("klouse_chest",
-            CubeListBuilder.create().texOffs(24, 32).addBox(-2.7F, 1.5F, -9.0F, 5.4F, 6.2F, 3.4F, new CubeDeformation(0.20F)),
+            CubeListBuilder.create().texOffs(24, 32).addBox(-2.7F, 1.5F, -9.0F, 5.4F, 6.2F, 3.4F, new CubeDeformation(0.16F)),
             PartPose.ZERO);
         root.getChild("tail1").addOrReplaceChild("klouse_tail_fluff",
             CubeListBuilder.create().texOffs(0, 44).addBox(-1.15F, -0.2F, -0.6F, 2.3F, 8.4F, 2.3F, new CubeDeformation(0.08F)),
