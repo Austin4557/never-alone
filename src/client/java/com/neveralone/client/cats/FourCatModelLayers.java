@@ -3,7 +3,6 @@ package com.neveralone.client.cats;
 import com.neveralone.NeverAlone;
 import net.minecraft.client.model.animal.feline.AdultCatModel;
 import net.minecraft.client.model.animal.feline.AdultFelineModel;
-import net.minecraft.client.model.animal.feline.BabyFelineModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -44,6 +43,12 @@ public final class FourCatModelLayers {
         root.getChild("body").addOrReplaceChild("oscar_ruff",
             CubeListBuilder.create().texOffs(24, 24).addBox(-2.8F, 2.0F, -8.7F, 5.6F, 5.0F, 3.2F, new CubeDeformation(0.18F)),
             PartPose.ZERO);
+        root.getChild("tail1").addOrReplaceChild("oscar_tail_fluff",
+            CubeListBuilder.create().texOffs(0, 34).addBox(-1.25F, -0.25F, -0.7F, 2.5F, 8.5F, 2.5F, new CubeDeformation(0.10F)),
+            PartPose.ZERO);
+        root.getChild("tail2").addOrReplaceChild("oscar_tail_tip_fluff",
+            CubeListBuilder.create().texOffs(12, 34).addBox(-1.2F, -0.25F, -0.7F, 2.4F, 8.5F, 2.4F, new CubeDeformation(0.10F)),
+            PartPose.ZERO);
         return LayerDefinition.create(mesh, 64, 64).apply(AdultCatModel.CAT_TRANSFORMER);
     }
 
@@ -55,6 +60,11 @@ public final class FourCatModelLayers {
     public static LayerDefinition createKlouse() {
         MeshDefinition mesh = AdultFelineModel.createBodyMesh(new CubeDeformation(0.34F));
         PartDefinition root = mesh.getRoot();
+        // Klouse is not only wider: a body-length overlay extends his silhouette
+        // along the body's local Y axis (the adult body is rotated 90 degrees).
+        root.getChild("body").addOrReplaceChild("klouse_long_body",
+            CubeListBuilder.create().texOffs(32, 34).addBox(-2.35F, -0.7F, -2.9F, 4.7F, 17.4F, 6.2F, new CubeDeformation(0.10F)),
+            PartPose.ZERO);
         root.getChild("body").addOrReplaceChild("klouse_chest",
             CubeListBuilder.create().texOffs(24, 24).addBox(-2.7F, 1.5F, -9.0F, 5.4F, 6.2F, 3.4F, new CubeDeformation(0.20F)),
             PartPose.ZERO);
