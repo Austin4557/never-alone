@@ -1,20 +1,32 @@
 package com.neveralone.mixin.client;
 
-import net.minecraft.client.model.geom.builders.CubeDeformation;
-import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.rpg_foundation.armor_api.client.geo.GeoBaker;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.rpg_foundation.armor_api.client.geo.GeoModel;
 
 /**
- * Armor Model API bakes box UV spans at 1 texel per model unit even when the
- * declared atlas is 256x256. Never Alone armor atlases are authored at 4x the
- * conventional 64px density, so scale the UV span without changing geometry.
+ * Gives only Never Alone's 256px armor atlases 4x box-UV density.
+ * Other Armor Model API consumers remain at the API's normal 1x density.
  */
 @Mixin(value = GeoBaker.class, remap = false)
 public abstract class ArmorGeoHighResMixin {
+    @Unique private static final ThreadLocal<Boolean> neverAlone$highRes = ThreadLocal.withInitial(() -> false);
+
+    @Inject(method = "bake", at = @At("HEAD"))
+    private static void neverAlone$beginHighRes(GeoModel model, String source, CallbackInfoReturnable<LayerDefinition> cir) {
+        neverAlone$highRes.set(source != null
+            && source.startsWith("never_alone:")
+            && model.textureWidth() == 256
+            && model.textureHeight() == 256);
+    }
+
     @ModifyArgs(
         method = "addCuboid",
         at = @At(
@@ -23,7 +35,14 @@ public abstract class ArmorGeoHighResMixin {
         )
     )
     private static void neverAlone$fourXArmorTexelDensity(Args args) {
-        args.set(7, 4.0F);
-        args.set(8, 4.0F);
+        if (neverAlone$highRes.get()) {
+            args.set(7, 4.0F);
+            args.set(8, 4.0F);
+        }
+    }
+
+    @Inject(method = "bake", at = @At("RETURN"))
+    private static void neverAlone$endHighRes(GeoModel model, String source, CallbackInfoReturnable<LayerDefinition> cir) {
+        neverAlone$highRes.remove();
     }
 }
