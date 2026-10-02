@@ -3,6 +3,8 @@ name: Build Never Alone
 on:
   push:
     branches: [ "main", "feature/dark-amethyst-armor", "feature/four-cats" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
