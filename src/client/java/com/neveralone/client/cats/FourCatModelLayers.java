@@ -38,18 +38,18 @@ public final class FourCatModelLayers {
         PartDefinition root = mesh.getRoot();
         // Extra ruff and cheek fluff ride with the animated body/head.
         root.getChild("head").addOrReplaceChild("oscar_cheeks",
-            CubeListBuilder.create().texOffs(0, 26).addBox(-3.0F, -1.2F, -2.3F, 6.0F, 3.6F, 4.4F, new CubeDeformation(0.12F)),
+            CubeListBuilder.create().texOffs(64, 0).addBox(-3.0F, -1.2F, -2.3F, 6.0F, 3.6F, 4.4F, new CubeDeformation(0.12F)),
             PartPose.ZERO);
         root.getChild("body").addOrReplaceChild("oscar_ruff",
-            CubeListBuilder.create().texOffs(24, 24).addBox(-2.8F, 2.0F, -8.7F, 5.6F, 5.0F, 3.2F, new CubeDeformation(0.18F)),
+            CubeListBuilder.create().texOffs(64, 24).addBox(-2.8F, 2.0F, -8.7F, 5.6F, 5.0F, 3.2F, new CubeDeformation(0.18F)),
             PartPose.ZERO);
         root.getChild("tail1").addOrReplaceChild("oscar_tail_fluff",
-            CubeListBuilder.create().texOffs(0, 34).addBox(-1.25F, -0.25F, -0.7F, 2.5F, 8.5F, 2.5F, new CubeDeformation(0.10F)),
+            CubeListBuilder.create().texOffs(64, 48).addBox(-1.25F, -0.25F, -0.7F, 2.5F, 8.5F, 2.5F, new CubeDeformation(0.10F)),
             PartPose.ZERO);
         root.getChild("tail2").addOrReplaceChild("oscar_tail_tip_fluff",
-            CubeListBuilder.create().texOffs(12, 34).addBox(-1.2F, -0.25F, -0.7F, 2.4F, 8.5F, 2.4F, new CubeDeformation(0.10F)),
+            CubeListBuilder.create().texOffs(80, 48).addBox(-1.2F, -0.25F, -0.7F, 2.4F, 8.5F, 2.4F, new CubeDeformation(0.10F)),
             PartPose.ZERO);
-        return LayerDefinition.create(mesh, 64, 64).apply(AdultCatModel.CAT_TRANSFORMER);
+        return LayerDefinition.create(mesh, 128, 128).apply(AdultCatModel.CAT_TRANSFORMER);
     }
 
     public static LayerDefinition createDrako() {
@@ -63,18 +63,18 @@ public final class FourCatModelLayers {
         // Klouse is not only wider: a body-length overlay extends his silhouette
         // along the body's local Y axis (the adult body is rotated 90 degrees).
         root.getChild("body").addOrReplaceChild("klouse_long_body",
-            CubeListBuilder.create().texOffs(32, 34).addBox(-2.35F, -0.7F, -2.9F, 4.7F, 17.4F, 6.2F, new CubeDeformation(0.10F)),
+            CubeListBuilder.create().texOffs(64, 72).addBox(-2.35F, -0.7F, -2.9F, 4.7F, 17.4F, 6.2F, new CubeDeformation(0.10F)),
             PartPose.ZERO);
         root.getChild("body").addOrReplaceChild("klouse_chest",
-            CubeListBuilder.create().texOffs(24, 24).addBox(-2.7F, 1.5F, -9.0F, 5.4F, 6.2F, 3.4F, new CubeDeformation(0.20F)),
+            CubeListBuilder.create().texOffs(64, 24).addBox(-2.7F, 1.5F, -9.0F, 5.4F, 6.2F, 3.4F, new CubeDeformation(0.20F)),
             PartPose.ZERO);
         root.getChild("tail1").addOrReplaceChild("klouse_tail_fluff",
-            CubeListBuilder.create().texOffs(0, 34).addBox(-1.15F, -0.2F, -0.6F, 2.3F, 8.4F, 2.3F, new CubeDeformation(0.08F)),
+            CubeListBuilder.create().texOffs(64, 48).addBox(-1.15F, -0.2F, -0.6F, 2.3F, 8.4F, 2.3F, new CubeDeformation(0.08F)),
             PartPose.ZERO);
         root.getChild("tail2").addOrReplaceChild("klouse_tail_tip_fluff",
-            CubeListBuilder.create().texOffs(10, 34).addBox(-1.1F, -0.2F, -0.6F, 2.2F, 8.4F, 2.2F, new CubeDeformation(0.08F)),
+            CubeListBuilder.create().texOffs(80, 48).addBox(-1.1F, -0.2F, -0.6F, 2.2F, 8.4F, 2.2F, new CubeDeformation(0.08F)),
             PartPose.ZERO);
-        return LayerDefinition.create(mesh, 64, 64).apply(AdultCatModel.CAT_TRANSFORMER);
+        return LayerDefinition.create(mesh, 128, 128).apply(AdultCatModel.CAT_TRANSFORMER);
     }
 
     private static MeshDefinition babyMesh() {
@@ -100,12 +100,12 @@ public final class FourCatModelLayers {
             root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0,8).addBox(-2.0F,-1.5F,-3.5F,4.0F,3.0F,7.0F,new CubeDeformation(puff)), PartPose.offset(0.0F,20.5F,0.5F));
         }
         if (chestFluff) {
-            root.getChild("body").addOrReplaceChild("baby_chest_fluff", CubeListBuilder.create().texOffs(0,27).addBox(-2.15F,-1.7F,-3.8F,4.3F,3.3F,2.2F,new CubeDeformation(0.08F)), PartPose.ZERO);
+            root.getChild("body").addOrReplaceChild("baby_chest_fluff", CubeListBuilder.create().texOffs(64,96).addBox(-2.15F,-1.7F,-3.8F,4.3F,3.3F,2.2F,new CubeDeformation(0.08F)), PartPose.ZERO);
         }
         if (tailFluff) {
             root.addOrReplaceChild("tail1", CubeListBuilder.create().texOffs(0,18).addBox(-0.9F,-0.107F,-0.25F,1.8F,1.8F,5.4F,new CubeDeformation(0.05F)), PartPose.offsetAndRotation(0.0F,19.107F,3.9151F,-0.567232F,0.0F,0.0F));
         }
-        return LayerDefinition.create(mesh,64,64);
+        return LayerDefinition.create(mesh,128,128);
     }
 
     public static LayerDefinition createOscarBaby() { return baby(0.28F, true, true); }
