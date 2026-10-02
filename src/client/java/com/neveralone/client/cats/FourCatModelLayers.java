@@ -36,7 +36,7 @@ public final class FourCatModelLayers {
     public static LayerDefinition createOscar() {
         MeshDefinition mesh = AdultFelineModel.createBodyMesh(new CubeDeformation(0.42F));
         PartDefinition root = mesh.getRoot();
-        // Extra ruff and cheek fluff ride with the animated body/head.
+        // Extra ruff and cheek fluff ride with the animated body/head. UV regions are isolated on the expanded custom atlas.
         root.getChild("head").addOrReplaceChild("oscar_cheeks",
             CubeListBuilder.create().texOffs(64, 0).addBox(-3.0F, -1.2F, -2.3F, 6.0F, 3.6F, 4.4F, new CubeDeformation(0.12F)),
             PartPose.ZERO);
