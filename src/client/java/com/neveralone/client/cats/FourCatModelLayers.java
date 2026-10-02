@@ -3,6 +3,7 @@ package com.neveralone.client.cats;
 import com.neveralone.NeverAlone;
 import net.minecraft.client.model.animal.feline.AdultCatModel;
 import net.minecraft.client.model.animal.feline.AdultFelineModel;
+import net.minecraft.client.model.animal.feline.BabyFelineModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -16,6 +17,10 @@ public final class FourCatModelLayers {
     public static final ModelLayerLocation DRAKO = layer("drako");
     public static final ModelLayerLocation KLOUSE = layer("klouse");
     public static final ModelLayerLocation LUCY = layer("lucy");
+    public static final ModelLayerLocation OSCAR_BABY = layer("oscar_baby");
+    public static final ModelLayerLocation DRAKO_BABY = layer("drako_baby");
+    public static final ModelLayerLocation KLOUSE_BABY = layer("klouse_baby");
+    public static final ModelLayerLocation LUCY_BABY = layer("lucy_baby");
 
     private FourCatModelLayers() {}
 
@@ -61,6 +66,42 @@ public final class FourCatModelLayers {
             PartPose.ZERO);
         return LayerDefinition.create(mesh, 64, 64).apply(AdultCatModel.CAT_TRANSFORMER);
     }
+
+    private static MeshDefinition babyMesh() {
+        // BabyFelineModel exposes its finished LayerDefinition rather than the
+        // mesh directly, so custom kitten meshes mirror the vanilla 26.2 layout.
+        MeshDefinition mesh = new MeshDefinition();
+        PartDefinition root = mesh.getRoot();
+        root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.5F,-3.0F,-2.875F,5.0F,4.0F,4.0F).texOffs(18,0).addBox(-2.0F,-4.0F,-0.875F,1.0F,1.0F,2.0F).texOffs(24,0).addBox(1.0F,-4.0F,-0.875F,1.0F,1.0F,2.0F).texOffs(18,3).addBox(-1.5F,-1.0F,-3.875F,3.0F,2.0F,1.0F), PartPose.offset(0.0F,20.0F,-3.125F));
+        root.addOrReplaceChild("left_front_leg", CubeListBuilder.create().texOffs(18,18).addBox(-0.5F,0.0F,-1.0F,1.0F,2.0F,2.0F), PartPose.offset(1.0F,22.0F,-1.5F));
+        root.addOrReplaceChild("right_front_leg", CubeListBuilder.create().texOffs(12,18).addBox(-0.5F,0.0F,-1.0F,1.0F,2.0F,2.0F), PartPose.offset(-1.0F,22.0F,-1.5F));
+        root.addOrReplaceChild("left_hind_leg", CubeListBuilder.create().texOffs(18,22).addBox(-0.5F,0.0F,-1.0F,1.0F,2.0F,2.0F), PartPose.offset(1.0F,22.0F,2.5F));
+        root.addOrReplaceChild("right_hind_leg", CubeListBuilder.create().texOffs(12,22).addBox(-0.5F,0.0F,-1.0F,1.0F,2.0F,2.0F), PartPose.offset(-1.0F,22.0F,2.5F));
+        root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0,8).addBox(-2.0F,-1.5F,-3.5F,4.0F,3.0F,7.0F), PartPose.offset(0.0F,20.5F,0.5F));
+        root.addOrReplaceChild("tail1", CubeListBuilder.create().texOffs(0,18).addBox(-0.5F,-0.107F,0.0849F,1.0F,1.0F,5.0F), PartPose.offsetAndRotation(0.0F,19.107F,3.9151F,-0.567232F,0.0F,0.0F));
+        root.addOrReplaceChild("tail2", CubeListBuilder.create(), PartPose.ZERO);
+        return mesh;
+    }
+
+    private static LayerDefinition baby(float puff, boolean chestFluff, boolean tailFluff) {
+        MeshDefinition mesh = babyMesh();
+        PartDefinition root = mesh.getRoot();
+        if (puff != 0.0F) {
+            root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0,8).addBox(-2.0F,-1.5F,-3.5F,4.0F,3.0F,7.0F,new CubeDeformation(puff)), PartPose.offset(0.0F,20.5F,0.5F));
+        }
+        if (chestFluff) {
+            root.getChild("body").addOrReplaceChild("baby_chest_fluff", CubeListBuilder.create().texOffs(0,27).addBox(-2.15F,-1.7F,-3.8F,4.3F,3.3F,2.2F,new CubeDeformation(0.08F)), PartPose.ZERO);
+        }
+        if (tailFluff) {
+            root.addOrReplaceChild("tail1", CubeListBuilder.create().texOffs(0,18).addBox(-0.9F,-0.107F,-0.25F,1.8F,1.8F,5.4F,new CubeDeformation(0.05F)), PartPose.offsetAndRotation(0.0F,19.107F,3.9151F,-0.567232F,0.0F,0.0F));
+        }
+        return LayerDefinition.create(mesh,32,32);
+    }
+
+    public static LayerDefinition createOscarBaby() { return baby(0.28F, true, true); }
+    public static LayerDefinition createDrakoBaby() { return baby(0.18F, false, false); }
+    public static LayerDefinition createKlouseBaby() { return baby(0.22F, true, true); }
+    public static LayerDefinition createLucyBaby() { return baby(-0.08F, false, false); }
 
     public static LayerDefinition createLucy() {
         // Slight inward deformation keeps her around vanilla scale but visibly leaner.
