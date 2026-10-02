@@ -1,6 +1,7 @@
 package com.neveralone.client.cats;
 
 import net.minecraft.client.renderer.entity.CatRenderer;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.CatRenderState;
 import net.minecraft.world.entity.animal.feline.Cat;
@@ -11,6 +12,7 @@ import net.minecraft.world.entity.animal.feline.Cat;
 public final class FourCatRenderer extends CatRenderer {
     public FourCatRenderer(EntityRendererProvider.Context context) {
         super(context);
+        this.model = new FourCatModel(context.bakeLayer(ModelLayers.CAT));
     }
 
     @Override
