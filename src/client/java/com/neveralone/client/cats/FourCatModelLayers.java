@@ -11,6 +11,7 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 
+/** Test 9 custom cat geometry and UV contract. */
 public final class FourCatModelLayers {
     public static final ModelLayerLocation OSCAR = layer("oscar");
     public static final ModelLayerLocation DRAKO = layer("drako");
