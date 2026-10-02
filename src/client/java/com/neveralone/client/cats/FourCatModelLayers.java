@@ -105,7 +105,7 @@ public final class FourCatModelLayers {
         if (tailFluff) {
             root.addOrReplaceChild("tail1", CubeListBuilder.create().texOffs(0,18).addBox(-0.9F,-0.107F,-0.25F,1.8F,1.8F,5.4F,new CubeDeformation(0.05F)), PartPose.offsetAndRotation(0.0F,19.107F,3.9151F,-0.567232F,0.0F,0.0F));
         }
-        return LayerDefinition.create(mesh,32,32);
+        return LayerDefinition.create(mesh,64,64);
     }
 
     public static LayerDefinition createOscarBaby() { return baby(0.28F, true, true); }
