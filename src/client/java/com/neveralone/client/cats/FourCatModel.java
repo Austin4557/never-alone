@@ -45,15 +45,16 @@ public final class FourCatModel extends AdultCatModel {
 
         // Drako, Klouse and Lucy knead while settled. Oscar's identity profile
         // has makesBiscuits=false, so he can never enter this animation.
-        if (state.shouldMakeBiscuits()) {
+        float biscuitWeight = state.biscuitWeight();
+        if (biscuitWeight > 0.0F) {
             float knead = Mth.sin(time * 0.32F + phase);
             float left = Math.max(0.0F, knead);
             float right = Math.max(0.0F, -knead);
 
-            leftFrontLeg.xRot -= left * 0.30F;
-            rightFrontLeg.xRot -= right * 0.30F;
-            leftFrontLeg.y += left * 0.55F * state.ageScale;
-            rightFrontLeg.y += right * 0.55F * state.ageScale;
+            leftFrontLeg.xRot -= left * 0.30F * biscuitWeight;
+            rightFrontLeg.xRot -= right * 0.30F * biscuitWeight;
+            leftFrontLeg.y += left * 0.55F * state.ageScale * biscuitWeight;
+            rightFrontLeg.y += right * 0.55F * state.ageScale * biscuitWeight;
         }
     }
 }
