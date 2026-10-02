@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import com.neveralone.client.cats.FourCatRenderer;
 import com.neveralone.client.cats.FourCatModelLayers;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -60,7 +60,7 @@ public final class NeverAloneClient implements ClientModInitializer {
         ModelLayerRegistry.registerModelLayer(FourCatModelLayers.DRAKO_BABY, FourCatModelLayers::createDrakoBaby);
         ModelLayerRegistry.registerModelLayer(FourCatModelLayers.KLOUSE_BABY, FourCatModelLayers::createKlouseBaby);
         ModelLayerRegistry.registerModelLayer(FourCatModelLayers.LUCY_BABY, FourCatModelLayers::createLucyBaby);
-        EntityRendererRegistry.register(EntityType.CAT, FourCatRenderer::new);
+        EntityRendererRegistry.register(EntityTypes.CAT, FourCatRenderer::new);
 
         ArmorRenderers.register(
             GeoArmorRenderer.of(
