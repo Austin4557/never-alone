@@ -48,8 +48,8 @@ public enum FourCatIdentity {
         return makesBiscuits;
     }
 
-    public Identifier texture() {
-        return NeverAlone.id("textures/entity/cat/" + assetName + ".png");
+    public Identifier texture(boolean baby) {
+        return NeverAlone.id("textures/entity/cat/" + assetName + (baby ? "_baby" : "") + ".png");
     }
 
     public static FourCatIdentity fromName(String rawName) {
