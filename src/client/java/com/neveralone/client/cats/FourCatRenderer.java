@@ -13,7 +13,7 @@ import net.minecraft.world.entity.animal.feline.Cat;
 /**
  * Vanilla-compatible renderer that selects a distinct adult mesh per custom cat.
  */
-public final class FourCatRenderer extends CatRenderer {
+public final class FourCatRenderer extends CatRenderer implements FourCatModelProvider {
     private final AbstractFelineModel<CatRenderState> vanillaAdult;
     private final FourCatModel oscarModel;
     private final FourCatModel drakoModel;
@@ -50,18 +50,8 @@ public final class FourCatRenderer extends CatRenderer {
     }
 
     @Override
-    public void submit(CatRenderState baseState, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
-        // Let AgeableMobRenderer perform its normal baby/adult selection first.
-        // For custom adults, swap our mesh immediately before LivingEntityRenderer
-        // consumes it. Babies and ordinary cats remain on the vanilla path.
-        if (baseState instanceof FourCatRenderState state && !state.isBaby && state.identity != null) {
-            this.model = modelFor(state.identity);
-            // Calling the parent would overwrite this.model with its private adult
-            // model, so custom adults render through our copied vanilla-compatible
-            // submit path in a later integration pass. For now preserve the known
-            // safe vanilla path until that hook is compile-verified.
-        }
-        super.submit(baseState, poseStack, collector, camera);
+    public AbstractFelineModel<CatRenderState> neverAlone$modelFor(FourCatIdentity identity) {
+        return modelFor(identity);
     }
 
     private AbstractFelineModel<CatRenderState> modelFor(FourCatIdentity identity) {
