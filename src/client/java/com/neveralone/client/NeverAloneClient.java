@@ -56,6 +56,10 @@ public final class NeverAloneClient implements ClientModInitializer {
         ModelLayerRegistry.registerModelLayer(FourCatModelLayers.DRAKO, FourCatModelLayers::createDrako);
         ModelLayerRegistry.registerModelLayer(FourCatModelLayers.KLOUSE, FourCatModelLayers::createKlouse);
         ModelLayerRegistry.registerModelLayer(FourCatModelLayers.LUCY, FourCatModelLayers::createLucy);
+        ModelLayerRegistry.registerModelLayer(FourCatModelLayers.OSCAR_BABY, FourCatModelLayers::createOscarBaby);
+        ModelLayerRegistry.registerModelLayer(FourCatModelLayers.DRAKO_BABY, FourCatModelLayers::createDrakoBaby);
+        ModelLayerRegistry.registerModelLayer(FourCatModelLayers.KLOUSE_BABY, FourCatModelLayers::createKlouseBaby);
+        ModelLayerRegistry.registerModelLayer(FourCatModelLayers.LUCY_BABY, FourCatModelLayers::createLucyBaby);
         EntityRendererRegistry.register(EntityType.CAT, FourCatRenderer::new);
 
         ArmorRenderers.register(
