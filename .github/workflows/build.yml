@@ -27,6 +27,21 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Generate original scare assets
         run: python tools/generate_assets.py
+      - name: Re-encode armor texture assets
+        run: |
+          python - <<'PY'
+          from PIL import Image, ImageFile
+          from pathlib import Path
+          ImageFile.LOAD_TRUNCATED_IMAGES = True
+          p = Path("src/main/resources/assets/never_alone/textures/armor/dark_amethyst.png")
+          with Image.open(p) as im:
+              im.load()
+              clean = im.convert("RGBA")
+          clean.save(p, format="PNG", optimize=False)
+          with Image.open(p) as check:
+              check.verify()
+          print("Re-encoded and verified", p)
+          PY
       - name: Build
         run: gradle build --stacktrace
       - name: Upload mod JAR
