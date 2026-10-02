@@ -1,7 +1,6 @@
 package com.neveralone.client.cats;
 
 import net.minecraft.client.model.animal.feline.AbstractFelineModel;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.CatRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.CatRenderState;
@@ -46,7 +45,7 @@ public final class FourCatRenderer extends CatRenderer implements FourCatModelPr
         state.animationSeed = entity.getId();
 
         if (state.identity != null) {
-            state.texture = state.identity.texture();
+            state.texture = state.identity.texture(state.isBaby);
         }
     }
 
