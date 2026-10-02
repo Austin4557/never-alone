@@ -36,9 +36,8 @@ public abstract class AgeableMobRendererMixin {
     ) {
         if ((Object) this instanceof FourCatModelProvider provider
             && baseState instanceof FourCatRenderState state
-            && !state.isBaby
             && state.identity != null) {
-            this.model = provider.neverAlone$modelFor(state.identity);
+            this.model = provider.neverAlone$modelFor(state.identity, state.isBaby);
         }
     }
 }
