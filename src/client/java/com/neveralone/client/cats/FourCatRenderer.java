@@ -3,38 +3,37 @@ package com.neveralone.client.cats;
 import net.minecraft.client.renderer.entity.CatRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.CatRenderState;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.animal.feline.Cat;
 
 /**
- * First-stage renderer hook. Keeps vanilla cat models/animations/collars while
- * swapping the texture for one of the four named cats. Custom geometry and
- * relaxed animation layers build on this once the hook is compile-verified.
+ * Vanilla-compatible cat renderer with per-cat identity state.
  */
 public final class FourCatRenderer extends CatRenderer {
-    private FourCatIdentity currentIdentity;
-
     public FourCatRenderer(EntityRendererProvider.Context context) {
         super(context);
     }
 
     @Override
-    public void extractRenderState(Cat entity, CatRenderState state, float partialTicks) {
-        super.extractRenderState(entity, state, partialTicks);
-        currentIdentity = entity.hasCustomName()
-            ? FourCatIdentity.fromName(entity.getCustomName().getString())
-            : null;
-        if (currentIdentity != null) {
-            state.texture = currentIdentity.texture();
-        }
+    public FourCatRenderState createRenderState() {
+        return new FourCatRenderState();
     }
 
     @Override
-    public Identifier getTextureLocation(CatRenderState state) {
-        return state.texture;
-    }
+    public void extractRenderState(Cat entity, CatRenderState baseState, float partialTicks) {
+        super.extractRenderState(entity, baseState, partialTicks);
+        if (!(baseState instanceof FourCatRenderState state)) {
+            return;
+        }
 
-    public FourCatIdentity currentIdentity() {
-        return currentIdentity;
+        state.identity = entity.hasCustomName()
+            ? FourCatIdentity.fromName(entity.getCustomName().getString())
+            : null;
+        state.animationSeed = entity.getId();
+
+        // Keep babies visually vanilla for the first implementation pass.
+        // Adult custom geometry/animations are deliberately not forced onto kittens.
+        if (state.identity != null && !state.isBaby) {
+            state.texture = state.identity.texture();
+        }
     }
 }
