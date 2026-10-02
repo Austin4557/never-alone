@@ -53,8 +53,13 @@ public final class FourCatModelLayers {
     }
 
     public static LayerDefinition createDrako() {
-        // Wider/rounder silhouette, but intentionally no long-fur add-ons.
-        return base(0.28F);
+        // Drako gets his own silhouette rather than sharing a deformed vanilla layer.
+        MeshDefinition mesh = AdultFelineModel.createBodyMesh(new CubeDeformation(0.24F));
+        PartDefinition root = mesh.getRoot();
+        root.getChild("body").addOrReplaceChild("drako_round_body",
+            CubeListBuilder.create().texOffs(32, 32).addBox(-2.35F, -0.2F, -2.8F, 4.7F, 16.4F, 5.8F, new CubeDeformation(0.06F)),
+            PartPose.ZERO);
+        return LayerDefinition.create(mesh, 64, 64).apply(AdultCatModel.CAT_TRANSFORMER);
     }
 
     public static LayerDefinition createKlouse() {
@@ -114,7 +119,12 @@ public final class FourCatModelLayers {
     public static LayerDefinition createLucyBaby() { return baby(-0.08F, false, false); }
 
     public static LayerDefinition createLucy() {
-        // Slight inward deformation keeps her around vanilla scale but visibly leaner.
-        return base(-0.12F);
+        // Lucy is deliberately slim and short-haired.
+        MeshDefinition mesh = AdultFelineModel.createBodyMesh(new CubeDeformation(-0.10F));
+        PartDefinition root = mesh.getRoot();
+        root.getChild("body").addOrReplaceChild("lucy_slim_body",
+            CubeListBuilder.create().texOffs(32, 32).addBox(-1.75F, 0.2F, -2.35F, 3.5F, 15.2F, 4.7F),
+            PartPose.ZERO);
+        return LayerDefinition.create(mesh, 64, 64).apply(AdultCatModel.CAT_TRANSFORMER);
     }
 }
