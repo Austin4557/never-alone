@@ -1,6 +1,9 @@
 package net.locallupo.whisperingspirits;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import static net.minecraft.commands.Commands.literal;
+import net.minecraft.network.chat.Component;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -32,6 +35,7 @@ public final class WhisperingSpiritsFabric implements ModInitializer {
     private static final Map<UUID, Integer> COOLDOWNS = new HashMap<>();
     private static final Map<UUID, String> PLAYER_DIMENSIONS = new HashMap<>();
     private static final SoundEvent[] WHISPERS = new SoundEvent[3];
+    private static final int FORCED_DURATION = 1200;
     private record Encounter(String dimension, Vec3 eyes, Vec3 eyeOffset, int ticksLeft) {}
     private int ticks;
     private net.minecraft.server.MinecraftServer lastServer;
@@ -42,6 +46,14 @@ public final class WhisperingSpiritsFabric implements ModInitializer {
             Identifier id = Identifier.fromNamespaceAndPath(MOD_ID, names[i]);
             WHISPERS[i] = Registry.register(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id));
         }
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, selection) ->
+            dispatcher.register(literal("whisperingspirits")
+                .then(literal("spawn").executes(ctx -> spawnCommand(ctx.getSource().getPlayerOrException())))
+                .then(literal("whisper").executes(ctx -> whisperCommand(ctx.getSource().getPlayerOrException())))
+                .then(literal("clear").executes(ctx -> clearCommand(ctx.getSource().getPlayerOrException())))
+                .then(literal("debug").executes(ctx -> debugCommand(ctx.getSource().getPlayerOrException())))
+            )
+        );
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             if (lastServer != server) {
                 ENCOUNTERS.clear(); COOLDOWNS.clear(); PLAYER_DIMENSIONS.clear();
@@ -117,6 +129,64 @@ public final class WhisperingSpiritsFabric implements ModInitializer {
                 COOLDOWNS.put(id, 800 + level.getRandom().nextInt(1200));
             }
         });
+    }
+
+    private static int spawnCommand(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) player.level();
+        Vec3 look = player.getLookAngle();
+        Vec3 horizontal = new Vec3(look.x, 0, look.z);
+        if (horizontal.lengthSqr() < 0.001) horizontal = new Vec3(0, 0, 1);
+        horizontal = horizontal.normalize();
+        // Spawn to the player's side to avoid triggering look detection immediately.
+        Vec3 sideways = new Vec3(-horizontal.z, 0, horizontal.x);
+        Vec3 approximate = player.position().add(sideways.scale(9));
+        BlockPos surface = locateSurfaceForCommand(level, BlockPos.containing(approximate));
+        if (surface == null) {
+            player.sendSystemMessage(Component.literal("No safe spawn location nearby. Try open ground."));
+            return 0;
+        }
+        Vec3 eyes = new Vec3(surface.getX() + 0.5, surface.getY() + 1.6, surface.getZ() + 0.5);
+        Vec3 toward = player.position().subtract(eyes);
+        double len = Math.hypot(toward.x, toward.z);
+        Vec3 offset = len < 0.001 ? new Vec3(.18,0,0) : new Vec3(-toward.z / len * .18, 0, toward.x / len * .18);
+        ENCOUNTERS.put(player.getUUID(), new Encounter(level.dimension().identifier().toString(), eyes, offset, FORCED_DURATION));
+        COOLDOWNS.put(player.getUUID(), MIN_COOLDOWN_AFTER_DESPAWN);
+        PLAYER_DIMENSIONS.put(player.getUUID(), level.dimension().identifier().toString());
+        player.sendSystemMessage(Component.literal("Spirit spawned nearby. Turn to your side and look for glowing eyes."));
+        return 1;
+    }
+    private static BlockPos locateSurfaceForCommand(ServerLevel level, BlockPos around) {
+        for (int offset = 4; offset >= -7; offset--) {
+            BlockPos feet = around.offset(0, offset, 0);
+            if (!level.isInWorldBounds(feet) || !level.hasChunkAt(feet) || !level.hasChunkAt(feet.below())) continue;
+            if (level.getBlockState(feet).isAir() && level.getBlockState(feet.above()).isAir()
+                && level.getBlockState(feet.below()).isFaceSturdy(level,feet.below(),net.minecraft.core.Direction.UP)) return feet;
+        }
+        return null;
+    }
+    private static int whisperCommand(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) player.level();
+        SoundEvent sound = WHISPERS[level.getRandom().nextInt(WHISPERS.length)];
+        Vec3 pos = player.position();
+        player.connection.send(new ClientboundSoundPacket(
+            BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound), SoundSource.AMBIENT,
+            pos.x, pos.y, pos.z, 1.0f, 1.0f, level.getRandom().nextLong()));
+        player.sendSystemMessage(Component.literal("Playing a whisper sound."));
+        return 1;
+    }
+    private static int clearCommand(ServerPlayer player) {
+        boolean existed = ENCOUNTERS.remove(player.getUUID()) != null;
+        COOLDOWNS.remove(player.getUUID());
+        player.sendSystemMessage(Component.literal(existed ? "Spirit cleared; cooldown reset." : "No active spirit; cooldown reset."));
+        return 1;
+    }
+    private static int debugCommand(ServerPlayer player) {
+        Encounter active = ENCOUNTERS.get(player.getUUID());
+        int cooldown = COOLDOWNS.getOrDefault(player.getUUID(), 0);
+        player.sendSystemMessage(Component.literal(active == null
+            ? "Whispering Spirits: no encounter; cooldown " + cooldown/20 + "s."
+            : "Whispering Spirits: active at " + active.eyes() + "; " + active.ticksLeft()/20 + "s remaining."));
+        return 1;
     }
 
     private static BlockPos locateDarkSurface(ServerLevel level, BlockPos around) {
