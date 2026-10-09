@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "whispering_spirits",
+  "version": "1.4.0-fabric26.2-texture-test2",
+  "name": "Whispering Spirits (Fabric Port)",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.locallupo.whisperingspirits.WhisperingSpiritsFabric"
+    ],
+    "client": [
+      "net.locallupo.whisperingspirits.WhisperingSpiritsClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "26.2",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}

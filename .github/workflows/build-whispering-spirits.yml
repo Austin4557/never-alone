@@ -1,0 +1,62 @@
+name: Build Whispering Spirits Fabric 26.2
+on:
+  push:
+    branches: ['port/whispering-spirits-fabric-26.2']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: whispering-spirits-port
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.5.1'
+      - name: Download original textures and sounds
+        run: |
+          curl -fL --retry 3 'https://mediafilez.forgecdn.net/files/7729/407/WhisperingSpirits-neoforge-1.21.8-v1.4.0.jar' -o /tmp/original.jar
+          python3 - <<'PY'
+          import zipfile,pathlib
+          with zipfile.ZipFile('/tmp/original.jar') as z:
+              for name in z.namelist():
+                  if name.startswith('assets/whispering_spirits/') and not name.endswith('/'):
+                      dest=pathlib.Path('src/main/resources')/name
+                      dest.parent.mkdir(parents=True,exist_ok=True)
+                      dest.write_bytes(z.read(name))
+          PY
+      - name: Prepare original eye sprite
+        run: |
+          python3 -m pip install --quiet Pillow
+          python3 - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          source = Path('src/main/resources/assets/whispering_spirits/textures/entities/watchereyes.png')
+          image = Image.open(source).convert('RGBA')
+          bbox = image.getchannel('A').getbbox()
+          assert bbox, "Original watcher eyes texture has no visible pixels"
+          eyes = image.crop(bbox)
+          width = 48
+          height = max(1, round(eyes.height * width / eyes.width))
+          eyes = eyes.resize((width, height), Image.Resampling.NEAREST)
+          canvas = Image.new('RGBA', (64,64), (0,0,0,0))
+          canvas.paste(eyes, ((64-width)//2,(64-height)//2))
+          dest = Path('src/main/resources/assets/whispering_spirits/textures/particle/watcher_eyes.png')
+          dest.parent.mkdir(parents=True, exist_ok=True)
+          canvas.save(dest)
+          print(f'Prepared original watcher eyes sprite: {bbox} -> {dest}')
+          PY
+      - name: Build
+        run: gradle --no-daemon clean build --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whispering-spirits-fabric-26.2
+          path: whispering-spirits-port/build/libs/*.jar
+          if-no-files-found: error
