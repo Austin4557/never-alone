@@ -323,8 +323,8 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 default -> Blocks.MANGROVE_ROOTS.defaultBlockState();
             };
             case WINDOW -> switch (material) {
-                case 0 -> Blocks.BLACK_WOOL.defaultBlockState();
-                case 1 -> Blocks.GRAY_WOOL.defaultBlockState();
+                case 0 -> Blocks.POLISHED_BLACKSTONE.defaultBlockState();
+                case 1 -> Blocks.DEEPSLATE.defaultBlockState();
                 default -> Blocks.CALCITE.defaultBlockState();
             };
             case SLEEP -> switch (material) {
