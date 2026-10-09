@@ -20,32 +20,70 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.5.1'
-      - name: Create original silhouette sprite
+      - name: Generate four distinct original stalker textures
         run: |
           python3 -m pip install --quiet Pillow
           python3 - <<'PY'
-          from PIL import Image, ImageDraw
+          from PIL import Image, ImageDraw, ImageFilter
           from pathlib import Path
-          im = Image.new('RGBA', (64,64), (0,0,0,0))
-          d = ImageDraw.Draw(im)
-          # Stylized original shadow humanoid. All pixel art here is generated from code.
-          edge=(37,40,49,220); body=(8,9,14,250)
-          d.ellipse((22,4,42,23), fill=edge)
-          d.ellipse((24,5,40,22), fill=body)
-          d.polygon([(23,19),(41,19),(47,35),(39,44),(37,58),(29,58),(25,44),(17,35)], fill=edge)
-          d.polygon([(25,20),(39,20),(43,35),(37,41),(35,56),(30,56),(27,40),(20,35)], fill=body)
-          # Long arms and narrow legs
-          d.polygon([(22,23),(17,24),(10,48),(13,51),(20,39),(26,32)], fill=body)
-          d.polygon([(42,23),(47,24),(54,48),(51,51),(44,39),(38,32)], fill=body)
-          d.polygon([(25,38),(32,38),(30,62),(23,62)], fill=body)
-          d.polygon([(33,38),(40,38),(43,62),(35,62)], fill=body)
-          # Dim, pale eyes
-          d.rectangle((27,13,29,14),fill=(191,210,218,255))
-          d.rectangle((35,13,37,14),fill=(191,210,218,255))
-          p=Path('src/main/resources/assets/donothearthemprototype/textures/particle/stalker_silhouette.png')
-          p.parent.mkdir(parents=True, exist_ok=True)
-          im.save(p)
-          print('Built custom sprite',p,im.size)
+          folder=Path('src/main/resources/assets/donothearthemprototype/textures/particle')
+          folder.mkdir(parents=True,exist_ok=True)
+          def new():
+              image=Image.new('RGBA',(64,64),(0,0,0,0))
+              return image,ImageDraw.Draw(image)
+          def save(image,key):
+              dest=folder/('stalker_'+key+'.png')
+              image.save(dest)
+              print('Generated',dest,image.getbbox())
+          # Cave: hunched, broad-shouldered humanoid with narrow turquoise eyes.
+          im,d=new()
+          d.ellipse((19,13,43,36),fill=(9,13,18,255))
+          d.polygon([(16,30),(44,27),(54,43),(45,59),(15,59),(8,46)],fill=(8,12,17,250))
+          d.line([(17,37),(6,58)], fill=(19,26,30,255),width=6)
+          d.line([(46,34),(58,58)],fill=(19,26,30,255),width=6)
+          d.polygon([(21,45),(31,45),(27,63),(18,63)],fill=(9,13,18,255))
+          d.polygon([(32,45),(42,45),(47,63),(38,63)],fill=(9,13,18,255))
+          d.rectangle((25,25,28,26),fill=(73,228,230,255))
+          d.rectangle((35,24,38,25),fill=(73,228,230,255))
+          save(im,'cave')
+          # Forest: unnaturally tall narrow shadow, branched head silhouette and amber eyes.
+          im,d=new()
+          d.line([(28,14),(12,0)],fill=(21,25,20,255),width=3)
+          d.line([(35,14),(49,0)],fill=(21,25,20,255),width=3)
+          d.line([(23,9),(22,0)],fill=(21,25,20,255),width=2)
+          d.line([(42,9),(41,0)],fill=(21,25,20,255),width=2)
+          d.ellipse((25,9,40,26),fill=(8,13,10,255))
+          d.polygon([(29,23),(37,23),(39,47),(36,62),(32,62),(30,47)],fill=(8,13,10,255))
+          d.line([(29,30),(16,54)],fill=(12,18,13,255),width=4)
+          d.line([(37,30),(50,57)],fill=(12,18,13,255),width=4)
+          d.line([(32,47),(25,64)],fill=(8,13,10,255),width=3)
+          d.line([(35,47),(42,64)],fill=(8,13,10,255),width=3)
+          d.rectangle((28,19,29,20),fill=(246,170,65,255))
+          d.rectangle((35,19,36,20),fill=(246,170,65,255))
+          save(im,'forest')
+          # Window: stark pallid face with looming black clothing and bright blank eyes.
+          im,d=new()
+          d.polygon([(18,26),(44,26),(49,60),(14,60)],fill=(14,13,20,255))
+          d.polygon([(18,34),(11,56),(16,59),(26,38)],fill=(14,13,20,255))
+          d.polygon([(44,34),(55,56),(50,59),(36,38)],fill=(14,13,20,255))
+          d.ellipse((18,3,45,35),fill=(162,169,175,255))
+          d.ellipse((20,5,43,33),fill=(191,193,197,255))
+          d.ellipse((24,17,29,23),fill=(7,7,12,255))
+          d.ellipse((35,17,40,23),fill=(7,7,12,255))
+          d.ellipse((25,19,27,20),fill=(248,248,251,255))
+          d.ellipse((36,19,38,20),fill=(248,248,251,255))
+          d.line([(29,28),(34,28)],fill=(37,33,43,255),width=2)
+          save(im,'window')
+          # Sleep: translucent floating wraith, hooded and lacking feet.
+          im,d=new()
+          d.ellipse((20,6,44,35),fill=(48,47,68,225))
+          d.ellipse((24,11,40,31),fill=(19,18,36,245))
+          d.polygon([(21,28),(44,28),(52,57),(42,51),(35,61),(28,52),(18,60),(12,54)],fill=(52,46,81,194))
+          d.polygon([(19,30),(11,46),(13,55),(25,38)],fill=(70,62,98,185))
+          d.polygon([(43,30),(54,46),(51,55),(37,38)],fill=(70,62,98,185))
+          d.ellipse((26,20,30,23),fill=(190,187,251,255))
+          d.ellipse((35,20,39,23),fill=(190,187,251,255))
+          save(im,'sleep')
           PY
       - name: Build
         run: gradle --no-daemon clean build --stacktrace
