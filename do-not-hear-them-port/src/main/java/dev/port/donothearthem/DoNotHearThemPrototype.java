@@ -29,7 +29,10 @@ import static net.minecraft.commands.Commands.literal;
 
 /** Independent, original implementation: atmospheric testing prototype. */
 public final class DoNotHearThemPrototype implements ModInitializer {
-    public static final SimpleParticleType STALKER_SPRITE = FabricParticleTypes.simple();
+    public static final SimpleParticleType CAVE_SPRITE = FabricParticleTypes.simple();
+    public static final SimpleParticleType FOREST_SPRITE = FabricParticleTypes.simple();
+    public static final SimpleParticleType WINDOW_SPRITE = FabricParticleTypes.simple();
+    public static final SimpleParticleType SLEEP_SPRITE = FabricParticleTypes.simple();
     private enum EncounterKind { CAVE, WINDOW, FOREST, SLEEP }
     private record Encounter(EncounterKind kind, String dimension, Vec3 location, int remainingTicks, int observedTicks) {}
     private static final Map<UUID, Encounter> ENCOUNTERS = new HashMap<>();
@@ -39,7 +42,10 @@ public final class DoNotHearThemPrototype implements ModInitializer {
     private int tick;
 
     @Override public void onInitialize() {
-        Registry.register(BuiltInRegistries.PARTICLE_TYPE, Identifier.fromNamespaceAndPath("donothearthemprototype", "stalker_silhouette"), STALKER_SPRITE);
+        Registry.register(BuiltInRegistries.PARTICLE_TYPE, Identifier.fromNamespaceAndPath("donothearthemprototype", "stalker_cave"), CAVE_SPRITE);
+        Registry.register(BuiltInRegistries.PARTICLE_TYPE, Identifier.fromNamespaceAndPath("donothearthemprototype", "stalker_forest"), FOREST_SPRITE);
+        Registry.register(BuiltInRegistries.PARTICLE_TYPE, Identifier.fromNamespaceAndPath("donothearthemprototype", "stalker_window"), WINDOW_SPRITE);
+        Registry.register(BuiltInRegistries.PARTICLE_TYPE, Identifier.fromNamespaceAndPath("donothearthemprototype", "stalker_sleep"), SLEEP_SPRITE);
         CommandRegistrationCallback.EVENT.register((dispatcher, access, selection) ->
             dispatcher.register(literal("dnht")
                 .then(literal("test")
@@ -146,7 +152,13 @@ public final class DoNotHearThemPrototype implements ModInitializer {
     private static void render(ServerPlayer player, ServerLevel level, Encounter encounter) {
         Vec3 p = encounter.location;
         // Dedicated texture-based player-facing figure, not vanilla smoke.
-        level.sendParticles(player, STALKER_SPRITE, true, false,
+        SimpleParticleType sprite = switch (encounter.kind) {
+            case CAVE -> CAVE_SPRITE;
+            case FOREST -> FOREST_SPRITE;
+            case WINDOW -> WINDOW_SPRITE;
+            case SLEEP -> SLEEP_SPRITE;
+        };
+        level.sendParticles(player, sprite, true, false,
                 p.x, p.y, p.z, 1, 0, 0, 0, 0);
         // Keep the original prototype's subtle atmospheric secondary effects.
         if (level.getRandom().nextInt(4) == 0) {
