@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "donothearthemprototype",
+  "version": "0.1.0-fabric26.2",
+  "name": "Do Not Hear Them — Fabric Encounter Prototype",
+  "description": "Independently implemented atmospheric encounter prototype. Does not contain original proprietary mobs, sounds, artwork or animations.",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.port.donothearthem.DoNotHearThemPrototype"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "26.2",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
