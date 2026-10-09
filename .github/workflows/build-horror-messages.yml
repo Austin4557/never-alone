@@ -1,0 +1,47 @@
+name: Build Horror Messages Fabric 26.2
+on:
+  push:
+    branches: ['port/horror-messages-fabric-26.2']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: horror-messages-port
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.5.1'
+      - name: Inspect original Fabric mod reference
+        continue-on-error: true
+        run: |
+          curl -fL --retry 3 'https://mediafilez.forgecdn.net/files/6793/334/horrormessages-1.0.1-fabric-1.20.1.jar' -o /tmp/horrormessages-original.jar
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          with zipfile.ZipFile('/tmp/horrormessages-original.jar') as z:
+              print('ORIGINAL JAR CONTENTS:', z.namelist()[:80])
+              for n in z.namelist():
+                  if n.endswith('.json') and (n.startswith('assets/') or n == 'fabric.mod.json'):
+                      print('REFERENCE RESOURCE:',n,z.read(n)[:1200].decode('utf-8','replace'))
+          PY
+      - name: Check reference message constants
+        continue-on-error: true
+        run: |
+          javap -c -p -classpath /tmp/horrormessages-original.jar net.mcreator.horrormessages.procedures.SendhorrormessageProcedure | grep '// String' | head -120 || true
+          javap -c -p -classpath /tmp/horrormessages-original.jar net.mcreator.horrormessages.procedures.HorrorMessagesProcedure | grep '// String' | head -120 || true
+      - name: Compile and package
+        run: gradle --no-daemon clean build --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: horror-messages-fabric-26.2
+          path: horror-messages-port/build/libs/*.jar
+          if-no-files-found: error
