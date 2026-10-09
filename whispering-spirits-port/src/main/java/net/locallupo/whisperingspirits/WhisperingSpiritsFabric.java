@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import static net.minecraft.commands.Commands.literal;
 import net.minecraft.network.chat.Component;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 public final class WhisperingSpiritsFabric implements ModInitializer {
     private static final String MOD_ID = "whispering_spirits";
+    public static final SimpleParticleType WATCHER_EYES_PARTICLE = new SimpleParticleType(false);
     private static final int TICKS_PER_CHECK = 10;
     private static final int MIN_COOLDOWN_AFTER_DESPAWN = 800;
     private static final double MAX_VIEW_DISTANCE = 40.0;
@@ -41,6 +42,7 @@ public final class WhisperingSpiritsFabric implements ModInitializer {
     private net.minecraft.server.MinecraftServer lastServer;
 
     @Override public void onInitialize() {
+        Registry.register(BuiltInRegistries.PARTICLE_TYPE, Identifier.fromNamespaceAndPath(MOD_ID, "watcher_eyes"), WATCHER_EYES_PARTICLE);
         String[] names = {"whisperone", "whispertwo", "whisperthree"};
         for (int i = 0; i < names.length; i++) {
             Identifier id = Identifier.fromNamespaceAndPath(MOD_ID, names[i]);
@@ -99,11 +101,8 @@ public final class WhisperingSpiritsFabric implements ModInitializer {
                     } else {
                         Vec3 pos = encounter.eyes();
                         if (level.getRandom().nextInt(5) != 0) {
-                            Vec3 left = pos.subtract(encounter.eyeOffset()), right = pos.add(encounter.eyeOffset());
-                            level.sendParticles(player, ParticleTypes.END_ROD, true, false,
-                                    left.x, left.y, left.z, 1, 0, 0, 0, 0);
-                            level.sendParticles(player, ParticleTypes.END_ROD, true, false,
-                                    right.x, right.y, right.z, 1, 0, 0, 0, 0);
+                            level.sendParticles(player, WATCHER_EYES_PARTICLE, true, false,
+                                    pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
                         }
                         ENCOUNTERS.put(id, new Encounter(dimension, pos, encounter.eyeOffset(), encounter.ticksLeft() - TICKS_PER_CHECK));
                     }
