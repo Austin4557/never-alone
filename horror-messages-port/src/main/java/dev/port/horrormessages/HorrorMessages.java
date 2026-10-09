@@ -15,30 +15,21 @@ import static net.minecraft.commands.Commands.literal;
 
 /**
  * Server-side timed horror chat messages. No client rendering or networking required.
- * The text catalog is a compatible recreation, not a claim of verbatim original dialogue.
+ * Message catalog taken from the original MIT-licensed Fabric release.
  */
 public final class HorrorMessages implements ModInitializer {
     private static final int MIN_INTERVAL_TICKS = 10 * 60 * 20;
     private static final int MAX_EXTRA_TICKS = 5 * 60 * 20;
     private static final String[] MESSAGES = {
-        "Did you hear that?",
-        "You are not alone.",
-        "Something moved behind you.",
-        "Don't look into the darkness for too long.",
-        "Someone is watching from far away.",
-        "You hear footsteps, but no one is there.",
-        "The silence feels wrong.",
-        "Something is standing just out of sight.",
-        "Did the shadows just change?",
-        "It knows where you are.",
-        "A faint whisper fades into the distance.",
-        "You feel like you are being followed.",
-        "The world seems unusually quiet.",
-        "You catch a glimpse of movement in the corner of your eye.",
-        "The feeling of being watched won't go away.",
-        "Something is waiting in the dark."
-    };
-    private static final Map<UUID, Integer> REMAINING = new HashMap<>();
+        "Help me",
+        "Behind you",
+        "Hello??",
+        "Can you hear me ?",
+        "I can see you",
+        "01001100 01000101 01000001 01010110 01000101",
+        "it's coming",
+        "Don't go over there."
+    };    private static final Map<UUID, Integer> REMAINING = new HashMap<>();
     private static final Map<UUID, Integer> PREVIOUS = new HashMap<>();
     private MinecraftServer activeServer;
 
