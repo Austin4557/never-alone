@@ -5,6 +5,10 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
+import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -25,6 +29,7 @@ import static net.minecraft.commands.Commands.literal;
 
 /** Independent, original implementation: atmospheric testing prototype. */
 public final class DoNotHearThemPrototype implements ModInitializer {
+    public static final SimpleParticleType STALKER_SPRITE = FabricParticleTypes.simple();
     private enum EncounterKind { CAVE, WINDOW, FOREST, SLEEP }
     private record Encounter(EncounterKind kind, String dimension, Vec3 location, int remainingTicks, int observedTicks) {}
     private static final Map<UUID, Encounter> ENCOUNTERS = new HashMap<>();
@@ -34,6 +39,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
     private int tick;
 
     @Override public void onInitialize() {
+        Registry.register(BuiltInRegistries.PARTICLE_TYPE, Identifier.fromNamespaceAndPath("donothearthemprototype", "stalker_silhouette"), STALKER_SPRITE);
         CommandRegistrationCallback.EVENT.register((dispatcher, access, selection) ->
             dispatcher.register(literal("dnht")
                 .then(literal("test")
@@ -88,7 +94,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                         ENCOUNTERS.remove(id);
                         continue;
                     }
-                    if (tick % 20 == 0) render(player, level, encounter);
+                    if (tick % 10 == 0) render(player, level, encounter);
                     ENCOUNTERS.put(id, new Encounter(encounter.kind, encounter.dimension,
                             encounter.location, encounter.remainingTicks-10, observedTicks));
                     continue;
@@ -120,7 +126,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         Vec3 location=new Vec3(feet.getX()+.5,feet.getY()+1.4,feet.getZ()+.5);
         ENCOUNTERS.put(player.getUUID(),new Encounter(kind,level.dimension().identifier().toString(),location,500,0));
         COOLDOWNS.put(player.getUUID(),2400);
-        player.sendSystemMessage(Component.literal("[DNHT test] " + kind.name().toLowerCase() + " encounter triggered."));
+        player.sendSystemMessage(Component.literal("[DNHT test] " + kind.name().toLowerCase() + " stalker spawned to your LEFT, around eight blocks away. Turn and look for a dark human-shaped figure."));
         sendSound(player,level,location);
         render(player,level,ENCOUNTERS.get(player.getUUID()));
         return 1;
@@ -138,34 +144,22 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         return null;
     }
     private static void render(ServerPlayer player, ServerLevel level, Encounter encounter) {
-        Vec3 p=encounter.location;
-        switch(encounter.kind) {
-            case CAVE -> {
-                silhouette(player, level, p, 2.5);
-                level.sendParticles(player,ParticleTypes.SOUL_FIRE_FLAME,true,false,p.x,p.y+0.55,p.z,1,0,0,0,0);
+        Vec3 p = encounter.location;
+        // Dedicated texture-based player-facing figure, not vanilla smoke.
+        level.sendParticles(player, STALKER_SPRITE, true, false,
+                p.x, p.y, p.z, 1, 0, 0, 0, 0);
+        // Keep the original prototype's subtle atmospheric secondary effects.
+        if (level.getRandom().nextInt(4) == 0) {
+            switch (encounter.kind) {
+                case CAVE -> level.sendParticles(player, ParticleTypes.ASH, true, false,
+                        p.x, p.y - 0.7, p.z, 2, .3, .2, .3, .001);
+                case WINDOW -> level.sendParticles(player, ParticleTypes.END_ROD, true, false,
+                        p.x, p.y + .55, p.z, 1, .05, .03, .05, 0);
+                case FOREST -> level.sendParticles(player, ParticleTypes.ASH, true, false,
+                        p.x, p.y, p.z, 2, .5, .7, .5, .001);
+                case SLEEP -> level.sendParticles(player, ParticleTypes.SOUL, true, false,
+                        p.x, p.y - .3, p.z, 1, .2, .2, .2, .001);
             }
-            case WINDOW -> {
-                silhouette(player, level, p, 1.8);
-                level.sendParticles(player,ParticleTypes.END_ROD,true,false,p.x-.18,p.y+.45,p.z,1,0,0,0,0);
-                level.sendParticles(player,ParticleTypes.END_ROD,true,false,p.x+.18,p.y+.45,p.z,1,0,0,0,0);
-            }
-            case FOREST -> {
-                silhouette(player, level, p, 2.8);
-                level.sendParticles(player,ParticleTypes.ASH,true,false,p.x,p.y,p.z,5,.4,.8,.4,.001);
-            }
-            case SLEEP -> {
-                silhouette(player, level, p, 1.9);
-                level.sendParticles(player,ParticleTypes.SOUL,true,false,p.x,p.y,p.z,3,.3,.3,.3,.001);
-            }
-        }
-    }
-    // Stylized procedural figure made only from vanilla particles; no copied models or assets.
-    private static void silhouette(ServerPlayer player, ServerLevel level, Vec3 p, double height) {
-        for (int i = 0; i < 9; i++) {
-            double y = p.y - .8 + i * height / 9.0;
-            double radius = i < 2 ? .20 : (i > 6 ? .19 : .32);
-            level.sendParticles(player, ParticleTypes.LARGE_SMOKE, true, false,
-                p.x, y, p.z, 1, radius, .015, radius, 0);
         }
     }
     private static void sendSound(ServerPlayer player,ServerLevel level,Vec3 location) {
