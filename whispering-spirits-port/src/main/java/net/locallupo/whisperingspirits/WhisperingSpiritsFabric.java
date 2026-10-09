@@ -77,16 +77,16 @@ public final class WhisperingSpiritsFabric implements ModInitializer {
                             && player.getLookAngle().normalize().dot(toSpirit.normalize()) > 0.975
                             && hasClearSight(level, player, encounter.eyes());
                     if (seen) {
-                        SoundEvent sound = WHISPERS[level.random.nextInt(WHISPERS.length)];
+                        SoundEvent sound = WHISPERS[level.getRandom().nextInt(WHISPERS.length)];
                         player.connection.send(new ClientboundSoundPacket(
                                 BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound), SoundSource.AMBIENT,
                                 encounter.eyes().x, encounter.eyes().y, encounter.eyes().z,
-                                0.75f, 0.85f + level.random.nextFloat() * 0.3f, level.random.nextLong()));
+                                0.75f, 0.85f + level.getRandom().nextFloat() * 0.3f, level.getRandom().nextLong()));
                         ENCOUNTERS.remove(id);
                         COOLDOWNS.merge(id, MIN_COOLDOWN_AFTER_DESPAWN, Math::max);
                     } else {
                         Vec3 pos = encounter.eyes();
-                        if (level.random.nextInt(5) != 0) {
+                        if (level.getRandom().nextInt(5) != 0) {
                             Vec3 left = pos.subtract(encounter.eyeOffset()), right = pos.add(encounter.eyeOffset());
                             level.sendParticles(player, ParticleTypes.END_ROD, true, false,
                                     left.x, left.y, left.z, 1, 0, 0, 0, 0);
@@ -99,9 +99,9 @@ public final class WhisperingSpiritsFabric implements ModInitializer {
                 }
                 int remaining = COOLDOWNS.getOrDefault(id, 0);
                 if (remaining > 0) { COOLDOWNS.put(id, Math.max(0, remaining - TICKS_PER_CHECK)); continue; }
-                if (level.random.nextInt(120) != 0) continue;
-                double angle = level.random.nextDouble() * Math.PI * 2;
-                double radius = MIN_SPAWN_RADIUS + level.random.nextDouble() * SPAWN_RADIUS_VARIATION;
+                if (level.getRandom().nextInt(120) != 0) continue;
+                double angle = level.getRandom().nextDouble() * Math.PI * 2;
+                double radius = MIN_SPAWN_RADIUS + level.getRandom().nextDouble() * SPAWN_RADIUS_VARIATION;
                 int x = (int)Math.floor(player.getX() + Math.cos(angle)*radius);
                 int z = (int)Math.floor(player.getZ() + Math.sin(angle)*radius);
                 BlockPos feet = locateDarkSurface(level, new BlockPos(x, player.getBlockY(), z));
@@ -113,8 +113,8 @@ public final class WhisperingSpiritsFabric implements ModInitializer {
                 double horizontal = Math.hypot(direction.x, direction.z);
                 if (horizontal < .01) continue;
                 Vec3 eyeOffset = new Vec3(-direction.z / horizontal * .18, 0, direction.x / horizontal * .18);
-                ENCOUNTERS.put(id, new Encounter(dimension, position, eyeOffset, 300 + level.random.nextInt(300)));
-                COOLDOWNS.put(id, 800 + level.random.nextInt(1200));
+                ENCOUNTERS.put(id, new Encounter(dimension, position, eyeOffset, 300 + level.getRandom().nextInt(300)));
+                COOLDOWNS.put(id, 800 + level.getRandom().nextInt(1200));
             }
         });
     }
