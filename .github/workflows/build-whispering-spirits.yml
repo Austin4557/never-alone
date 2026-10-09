@@ -32,6 +32,27 @@ jobs:
                       dest.parent.mkdir(parents=True,exist_ok=True)
                       dest.write_bytes(z.read(name))
           PY
+      - name: Prepare original eye sprite
+        run: |
+          python3 -m pip install --quiet Pillow
+          python3 - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          source = Path('src/main/resources/assets/whispering_spirits/textures/entities/watchereyes.png')
+          image = Image.open(source).convert('RGBA')
+          bbox = image.getchannel('A').getbbox()
+          assert bbox, "Original watcher eyes texture has no visible pixels"
+          eyes = image.crop(bbox)
+          width = 48
+          height = max(1, round(eyes.height * width / eyes.width))
+          eyes = eyes.resize((width, height), Image.Resampling.NEAREST)
+          canvas = Image.new('RGBA', (64,64), (0,0,0,0))
+          canvas.paste(eyes, ((64-width)//2,(64-height)//2))
+          dest = Path('src/main/resources/assets/whispering_spirits/textures/particle/watcher_eyes.png')
+          dest.parent.mkdir(parents=True, exist_ok=True)
+          canvas.save(dest)
+          print(f'Prepared original watcher eyes sprite: {bbox} -> {dest}')
+          PY
       - name: Build
         run: gradle --no-daemon clean build --stacktrace
       - uses: actions/upload-artifact@v4
