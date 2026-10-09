@@ -1,12 +1,15 @@
 {
   "schemaVersion": 1,
   "id": "whispering_spirits",
-  "version": "1.4.0-fabric26.2-test1",
+  "version": "1.4.0-fabric26.2-texture-test2",
   "name": "Whispering Spirits (Fabric Port)",
   "environment": "*",
   "entrypoints": {
     "main": [
       "net.locallupo.whisperingspirits.WhisperingSpiritsFabric"
+    ],
+    "client": [
+      "net.locallupo.whisperingspirits.WhisperingSpiritsClient"
     ]
   },
   "depends": {
