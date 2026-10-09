@@ -20,6 +20,33 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.5.1'
+      - name: Create original silhouette sprite
+        run: |
+          python3 -m pip install --quiet Pillow
+          python3 - <<'PY'
+          from PIL import Image, ImageDraw
+          from pathlib import Path
+          im = Image.new('RGBA', (64,64), (0,0,0,0))
+          d = ImageDraw.Draw(im)
+          # Stylized original shadow humanoid. All pixel art here is generated from code.
+          edge=(37,40,49,220); body=(8,9,14,250)
+          d.ellipse((22,4,42,23), fill=edge)
+          d.ellipse((24,5,40,22), fill=body)
+          d.polygon([(23,19),(41,19),(47,35),(39,44),(37,58),(29,58),(25,44),(17,35)], fill=edge)
+          d.polygon([(25,20),(39,20),(43,35),(37,41),(35,56),(30,56),(27,40),(20,35)], fill=body)
+          # Long arms and narrow legs
+          d.polygon([(22,23),(17,24),(10,48),(13,51),(20,39),(26,32)], fill=body)
+          d.polygon([(42,23),(47,24),(54,48),(51,51),(44,39),(38,32)], fill=body)
+          d.polygon([(25,38),(32,38),(30,62),(23,62)], fill=body)
+          d.polygon([(33,38),(40,38),(43,62),(35,62)], fill=body)
+          # Dim, pale eyes
+          d.rectangle((27,13,29,14),fill=(191,210,218,255))
+          d.rectangle((35,13,37,14),fill=(191,210,218,255))
+          p=Path('src/main/resources/assets/donothearthemprototype/textures/particle/stalker_silhouette.png')
+          p.parent.mkdir(parents=True, exist_ok=True)
+          im.save(p)
+          print('Built custom sprite',p,im.size)
+          PY
       - name: Build
         run: gradle --no-daemon clean build --stacktrace
       - uses: actions/upload-artifact@v4
