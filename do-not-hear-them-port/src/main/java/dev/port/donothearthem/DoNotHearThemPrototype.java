@@ -81,7 +81,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 if (level.getRandom().nextInt(600) != 0) continue;
                 EncounterKind chosen;
                 if (player.getBlockY() < 55 && level.getMaxLocalRawBrightness(player.blockPosition()) <= 7) chosen=EncounterKind.CAVE;
-                else if (level.isNight()) chosen=EncounterKind.FOREST;
+                else if ((level.getDayTime() % 24000L >= 13000L && level.getDayTime() % 24000L <= 23000L)) chosen=EncounterKind.FOREST;
                 else continue;
                 spawn(player, chosen);
             }
@@ -141,7 +141,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
     }
     private static void sendSound(ServerPlayer player,ServerLevel level,Vec3 location) {
         player.connection.send(new ClientboundSoundPacket(
-            BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.CAVE_AMBIENT),
+            BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.ENDERMAN_STARE),
             SoundSource.AMBIENT,location.x,location.y,location.z,
             0.75f,0.65f+level.getRandom().nextFloat()*.3f,level.getRandom().nextLong()));
     }
