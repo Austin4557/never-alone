@@ -81,7 +81,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 if (level.getRandom().nextInt(600) != 0) continue;
                 EncounterKind chosen;
                 if (player.getBlockY() < 55 && level.getMaxLocalRawBrightness(player.blockPosition()) <= 7) chosen=EncounterKind.CAVE;
-                else if ((level.getDayTime() % 24000L >= 13000L && level.getDayTime() % 24000L <= 23000L)) chosen=EncounterKind.FOREST;
+                else if (level.getMaxLocalRawBrightness(player.blockPosition().above()) <= 7) chosen=EncounterKind.FOREST;
                 else continue;
                 spawn(player, chosen);
             }
