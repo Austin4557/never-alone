@@ -14,6 +14,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.HitResult;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -24,7 +26,7 @@ import static net.minecraft.commands.Commands.literal;
 /** Independent, original implementation: atmospheric testing prototype. */
 public final class DoNotHearThemPrototype implements ModInitializer {
     private enum EncounterKind { CAVE, WINDOW, FOREST, SLEEP }
-    private record Encounter(EncounterKind kind, String dimension, Vec3 location, int remainingTicks) {}
+    private record Encounter(EncounterKind kind, String dimension, Vec3 location, int remainingTicks, int observedTicks) {}
     private static final Map<UUID, Encounter> ENCOUNTERS = new HashMap<>();
     private static final Map<UUID, Integer> COOLDOWNS = new HashMap<>();
     private static final Map<UUID, Boolean> SLEEP_STATE = new HashMap<>();
@@ -71,9 +73,24 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                             || encounter.remainingTicks <= 0) {
                         ENCOUNTERS.remove(id); continue;
                     }
+                    Vec3 toward = encounter.location.subtract(player.getEyePosition());
+                    boolean observed = toward.lengthSqr() < 900 && toward.lengthSqr() > .001
+                        && player.getLookAngle().normalize().dot(toward.normalize()) > .955
+                        && level.clip(new ClipContext(player.getEyePosition(), encounter.location,
+                            ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getType() == HitResult.Type.MISS;
+                    int observedTicks = observed ? encounter.observedTicks + 10 : Math.max(0, encounter.observedTicks - 10);
+                    // Stalkers grow more visible when ignored and vanish after sustained observation.
+                    if (observedTicks >= 30) {
+                        level.sendParticles(player, ParticleTypes.POOF, true, false,
+                            encounter.location.x, encounter.location.y, encounter.location.z,
+                            8, .35, .8, .35, .02);
+                        sendSound(player, level, encounter.location);
+                        ENCOUNTERS.remove(id);
+                        continue;
+                    }
                     if (tick % 20 == 0) render(player, level, encounter);
                     ENCOUNTERS.put(id, new Encounter(encounter.kind, encounter.dimension,
-                            encounter.location, encounter.remainingTicks-10));
+                            encounter.location, encounter.remainingTicks-10, observedTicks));
                     continue;
                 }
                 int cooldown = COOLDOWNS.getOrDefault(id, 0);
@@ -101,7 +118,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
             return 0;
         }
         Vec3 location=new Vec3(feet.getX()+.5,feet.getY()+1.4,feet.getZ()+.5);
-        ENCOUNTERS.put(player.getUUID(),new Encounter(kind,level.dimension().identifier().toString(),location,280));
+        ENCOUNTERS.put(player.getUUID(),new Encounter(kind,level.dimension().identifier().toString(),location,500,0));
         COOLDOWNS.put(player.getUUID(),2400);
         player.sendSystemMessage(Component.literal("[DNHT test] " + kind.name().toLowerCase() + " encounter triggered."));
         sendSound(player,level,location);
@@ -124,19 +141,31 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         Vec3 p=encounter.location;
         switch(encounter.kind) {
             case CAVE -> {
-                level.sendParticles(player,ParticleTypes.SMOKE,true,false,p.x,p.y,p.z,4,.2,.5,.2,.001);
-                level.sendParticles(player,ParticleTypes.SOUL_FIRE_FLAME,true,false,p.x,p.y+0.3,p.z,1,0,0,0,0);
+                silhouette(player, level, p, 2.5);
+                level.sendParticles(player,ParticleTypes.SOUL_FIRE_FLAME,true,false,p.x,p.y+0.55,p.z,1,0,0,0,0);
             }
             case WINDOW -> {
-                level.sendParticles(player,ParticleTypes.END_ROD,true,false,p.x-.15,p.y+.2,p.z,1,0,0,0,0);
-                level.sendParticles(player,ParticleTypes.END_ROD,true,false,p.x+.15,p.y+.2,p.z,1,0,0,0,0);
+                silhouette(player, level, p, 1.8);
+                level.sendParticles(player,ParticleTypes.END_ROD,true,false,p.x-.18,p.y+.45,p.z,1,0,0,0,0);
+                level.sendParticles(player,ParticleTypes.END_ROD,true,false,p.x+.18,p.y+.45,p.z,1,0,0,0,0);
             }
             case FOREST -> {
+                silhouette(player, level, p, 2.8);
                 level.sendParticles(player,ParticleTypes.ASH,true,false,p.x,p.y,p.z,5,.4,.8,.4,.001);
             }
             case SLEEP -> {
+                silhouette(player, level, p, 1.9);
                 level.sendParticles(player,ParticleTypes.SOUL,true,false,p.x,p.y,p.z,3,.3,.3,.3,.001);
             }
+        }
+    }
+    // Stylized procedural figure made only from vanilla particles; no copied models or assets.
+    private static void silhouette(ServerPlayer player, ServerLevel level, Vec3 p, double height) {
+        for (int i = 0; i < 9; i++) {
+            double y = p.y - .8 + i * height / 9.0;
+            double radius = i < 2 ? .20 : (i > 6 ? .19 : .32);
+            level.sendParticles(player, ParticleTypes.LARGE_SMOKE, true, false,
+                p.x, y, p.z, 1, radius, .015, radius, 0);
         }
     }
     private static void sendSound(ServerPlayer player,ServerLevel level,Vec3 location) {
