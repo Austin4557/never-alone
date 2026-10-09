@@ -185,7 +185,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         spawnBody(player, level, location, kind);
         ENCOUNTERS.put(player.getUUID(),new Encounter(kind,level.dimension().identifier().toString(),location,500,0));
         COOLDOWNS.put(player.getUUID(),2400);
-        player.sendSystemMessage(Component.literal("[DNHT v9] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
+        player.sendSystemMessage(Component.literal("[DNHT v10] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
         sendSound(player,level,location);
         render(player,level,ENCOUNTERS.get(player.getUUID()));
         return 1;
@@ -380,15 +380,19 @@ public final class DoNotHearThemPrototype implements ModInitializer {
 
     private static void render(ServerPlayer player, ServerLevel level, Encounter encounter) {
         Vec3 p = encounter.location;
-        // Dedicated texture-based player-facing figure, not vanilla smoke.
-        SimpleParticleType sprite = switch (encounter.kind) {
-            case CAVE -> CAVE_SPRITE;
-            case FOREST -> FOREST_SPRITE;
-            case WINDOW -> WINDOW_SPRITE;
-            case SLEEP -> SLEEP_SPRITE;
-        };
-        level.sendParticles(player, sprite, true, false,
-                p.x, p.y, p.z, 1, 0, 0, 0, 0);
+        // A successfully spawned 3D body must be the only full-body renderer.
+        // Preserve the old sprite only as a fallback when no 3D parts exist.
+        List<BodyPart> body = BODY_PARTS.get(player.getUUID());
+        if (body == null || body.isEmpty()) {
+            SimpleParticleType sprite = switch (encounter.kind) {
+                case CAVE -> CAVE_SPRITE;
+                case FOREST -> FOREST_SPRITE;
+                case WINDOW -> WINDOW_SPRITE;
+                case SLEEP -> SLEEP_SPRITE;
+            };
+            level.sendParticles(player, sprite, true, false,
+                    p.x, p.y, p.z, 1, 0, 0, 0, 0);
+        }
         // Keep the original prototype's subtle atmospheric secondary effects.
         if (level.getRandom().nextInt(4) == 0) {
             switch (encounter.kind) {
