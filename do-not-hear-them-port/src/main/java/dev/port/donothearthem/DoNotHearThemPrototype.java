@@ -208,14 +208,14 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         BlockState surface = switch (kind) {
             case CAVE -> Blocks.DEEPSLATE_TILES.defaultBlockState();
             case FOREST -> Blocks.DARK_OAK_LOG.defaultBlockState();
-            case WINDOW -> Blocks.GRAY_CONCRETE.defaultBlockState();
+            case WINDOW -> Blocks.CALCITE.defaultBlockState();
             case SLEEP -> Blocks.SCULK.defaultBlockState();
         };
         BlockState secondary = switch (kind) {
             case CAVE -> Blocks.POLISHED_BLACKSTONE.defaultBlockState();
             case FOREST -> Blocks.MANGROVE_ROOTS.defaultBlockState();
-            case WINDOW -> Blocks.BLACK_CONCRETE.defaultBlockState();
-            case SLEEP -> Blocks.PURPLE_CONCRETE.defaultBlockState();
+            case WINDOW -> Blocks.POLISHED_BLACKSTONE.defaultBlockState();
+            case SLEEP -> Blocks.AMETHYST_BLOCK.defaultBlockState();
         };
         // Offsets are relative to the 2D figure's midpoint; depth offsets make a solid silhouette.
         float[][] parts = {
@@ -233,7 +233,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         };
         List<Display.BlockDisplay> displays = new ArrayList<>();
         for (int i=0;i<parts.length;i++) {
-            Display.BlockDisplay part = EntityType.BLOCK_DISPLAY.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+            Display.BlockDisplay part = ((EntityType<Display.BlockDisplay>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.fromNamespaceAndPath("minecraft", "block_display"))).create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
             if (part == null) continue;
             float[] p = parts[i];
             part.setBlockState(i >= 6 ? secondary : surface);
