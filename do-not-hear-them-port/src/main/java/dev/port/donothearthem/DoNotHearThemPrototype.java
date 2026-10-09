@@ -104,11 +104,11 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                         && level.clip(new ClipContext(player.getEyePosition(), encounter.location,
                             ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getType() == HitResult.Type.MISS;
                     int observedTicks = observed ? encounter.observedTicks + 10 : Math.max(0, encounter.observedTicks - 10);
-                    int elapsedTicks = Math.max(0, 500 - encounter.remainingTicks);
+                    int elapsedTicks = Math.max(0, (encounter.kind == EncounterKind.FOREST ? 1200 : 500) - encounter.remainingTicks);
                     Vec3 nextLocation = encounter.location;
                     int sightThreshold = switch (encounter.kind) {
                         case CAVE -> 50;     // Keeps advancing until faced down.
-                        case FOREST -> 20;   // Vanishes almost immediately when spotted.
+                        case FOREST -> elapsedTicks < 300 ? 10000 : 120; // Give the player at least 15 seconds to inspect the forest model.
                         case WINDOW -> 70;   // Holds its stare before slipping away.
                         case SLEEP -> 40;    // Floats, then dissolves.
                     };
@@ -183,9 +183,9 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         Vec3 location=new Vec3(feet.getX()+.5,feet.getY()+1.4,feet.getZ()+.5);
         clearBody(player.getUUID());
         spawnBody(player, level, location, kind);
-        ENCOUNTERS.put(player.getUUID(),new Encounter(kind,level.dimension().identifier().toString(),location,500,0));
+        ENCOUNTERS.put(player.getUUID(),new Encounter(kind,level.dimension().identifier().toString(),location,kind==EncounterKind.FOREST?1200:500,0));
         COOLDOWNS.put(player.getUUID(),2400);
-        player.sendSystemMessage(Component.literal("[DNHT v11] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
+        player.sendSystemMessage(Component.literal("[DNHT v12] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
         sendSound(player,level,location);
         render(player,level,ENCOUNTERS.get(player.getUUID()));
         return 1;
@@ -245,27 +245,44 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 for(int i=0;i<6;i++) piece(s,-.55f+i*.22f,.06f+i%2*.12f,-.63f,.15f,.36f,.19f,i%2==0?-27:26,2,0);
             }
             case FOREST -> {
-                // Tall, hollow wood skeleton, roots, antlers and thin articulated fingers.
-                bone(s,0,.23f,0,-.92f,.33f,.32f,-.34f,0,0);
-                piece(s,0,-.25f,-.47f,.61f,.78f,.25f,0,1,0);
-                piece(s,0,.99f,-.30f,.34f,.43f,.38f,0,0,1);
-                bone(s,-.22f,.55f,-.45f,-.44f,.21f,.19f,-.3f,0,2);
-                bone(s,-.45f,-.44f,-.69f,-1.38f,.17f,.16f,-.3f,0,2);
-                bone(s,.22f,.55f,.45f,-.44f,.21f,.19f,-.3f,0,3);
-                bone(s,.45f,-.44f,.69f,-1.38f,.17f,.16f,-.3f,0,3);
-                bone(s,-.16f,-.91f,-.30f,-1.97f,.20f,.17f,-.28f,0,4);
-                bone(s,-.30f,-1.97f,-.47f,-2.55f,.19f,.16f,-.28f,1,4);
-                bone(s,.16f,-.91f,.30f,-1.97f,.20f,.17f,-.28f,0,5);
-                bone(s,.30f,-1.97f,.47f,-2.55f,.19f,.16f,-.28f,1,5);
-                for(int side : new int[]{-1,1}) {
-                    bone(s,side*.11f,1.18f,side*.55f,1.82f,.16f,.14f,-.3f,1,6);
-                    bone(s,side*.55f,1.82f,side*.86f,2.16f,.13f,.10f,-.3f,1,6);
-                    bone(s,side*.41f,1.61f,side*.42f,2.10f,.12f,.09f,-.3f,1,6);
-                    bone(s,side*.65f,1.94f,side*1.1f,2.03f,.12f,.08f,-.3f,1,6);
-                    for(int i=0;i<3;i++) bone(s,side*.67f,-1.36f,side*(.75f+i*.13f),-1.69f,.09f,.07f,-.2f,2,side<0?2:3);
-                    for(int i=0;i<3;i++) bone(s,side*.47f,-2.52f,side*(.70f+i*.13f),-2.7f,.13f,.08f,-.2f,2,0);
+                // Forest Hollow v12: connected organic torso, integrated shoulders and crown.
+                // Every long appendage overlaps its socket so it cannot appear to float.
+                piece(s,0,-.18f,-.36f,.72f,1.28f,.50f,0,0,0);       // solid central spine
+                piece(s,0,.34f,-.39f,.94f,.42f,.48f,0,1,0);         // broader shoulders
+                piece(s,0,-.57f,-.38f,.64f,.64f,.43f,0,0,0);        // hips
+                piece(s,0,.96f,-.34f,.49f,.60f,.47f,0,0,1);        // elongated head
+                piece(s,0,.84f,-.08f,.28f,.34f,.12f,0,2,1);        // mask relief
+                bone(s,0,.71f,0,.40f,.39f,.35f,-.36f,1,1);          // neck socket
+                for (int side : new int[]{-1,1}) {
+                    // clavicles and shoulder caps bridge torso to arm.
+                    bone(s,side*.14f,.45f,side*.48f,.32f,.29f,.27f,-.34f,1,0);
+                    piece(s,side*.46f,.27f,-.35f,.37f,.38f,.38f,side*-13,0,0);
+                    bone(s,side*.46f,.24f,side*.62f,-.53f,.28f,.28f,-.33f,0,2+(side>0?1:0));
+                    bone(s,side*.62f,-.53f,side*.82f,-1.26f,.23f,.21f,-.33f,0,2+(side>0?1:0));
+                    piece(s,side*.75f,-1.19f,-.34f,.23f,.23f,.25f,0,1,2+(side>0?1:0));
+                    for (int i=0;i<3;i++) bone(s,side*.77f,-1.24f,
+                        side*(.80f+i*.11f),-1.58f-i*.05f,.09f,.075f,-.22f,2,2+(side>0?1:0));
+                    // knees/feet connect continuously to hip socket.
+                    bone(s,side*.21f,-.78f,side*.29f,-1.58f,.27f,.24f,-.37f,0,4+(side>0?1:0));
+                    bone(s,side*.29f,-1.56f,side*.44f,-2.20f,.23f,.22f,-.38f,0,4+(side>0?1:0));
+                    piece(s,side*.43f,-2.22f,-.25f,.32f,.22f,.49f,0,1,0);
+                    for(int i=0;i<3;i++) bone(s,side*.42f,-2.23f,
+                        side*(.48f+i*.14f),-2.42f,.18f,.085f,-.06f,2,0);
+                    // Antlers start *inside* the crown and fork naturally.
+                    bone(s,side*.13f,1.15f,side*.43f,1.61f,.20f,.17f,-.37f,1,6);
+                    bone(s,side*.40f,1.57f,side*.78f,1.96f,.15f,.12f,-.37f,1,6);
+                    bone(s,side*.65f,1.79f,side*.97f,2.07f,.13f,.105f,-.37f,1,6);
+                    bone(s,side*.37f,1.52f,side*.36f,2.01f,.13f,.10f,-.37f,1,6);
+                    bone(s,side*.77f,1.95f,side*1.11f,2.06f,.11f,.075f,-.37f,1,6);
+                    // Rib-like root filaments overlap and weave across the torso.
+                    for(int i=0;i<3;i++) bone(s,side*.20f,.18f-i*.22f,
+                        side*.04f,-.26f-i*.19f,.15f,.10f,-.65f,2,0);
                 }
-                for(int i=0;i<7;i++) piece(s,-.28f+i*.095f,-.30f-(i%3)*.15f,-.69f,.08f,.58f,.11f,4+i*3,2,0);
+                // Trunk ridges and hanging moss, intentionally embedded in torso.
+                for(int i=0;i<7;i++) {
+                    float x=-.28f+i*.093f;
+                    piece(s,x,-.17f-(i%3)*.18f,-.66f,.105f,.55f,.14f,(i-3)*3,2,0);
+                }
             }
             case WINDOW -> {
                 // Hollow coat, hood, dark layers and pale face made from many narrow strips.
