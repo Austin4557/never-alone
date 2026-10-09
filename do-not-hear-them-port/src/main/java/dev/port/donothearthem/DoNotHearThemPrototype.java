@@ -185,7 +185,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         spawnBody(player, level, location, kind);
         ENCOUNTERS.put(player.getUUID(),new Encounter(kind,level.dimension().identifier().toString(),location,500,0));
         COOLDOWNS.put(player.getUUID(),2400);
-        player.sendSystemMessage(Component.literal("[DNHT v10] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
+        player.sendSystemMessage(Component.literal("[DNHT v11] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
         sendSound(player,level,location);
         render(player,level,ENCOUNTERS.get(player.getUUID()));
         return 1;
@@ -349,7 +349,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
             display.setBlockState(blockFor(kind,shape.material));
             display.setPos(origin.x+shape.x,origin.y+shape.y,origin.z+shape.z);
             display.setTransformation(new Transformation(
-                new Vector3f(-shape.w/2,-shape.h/2,-shape.d/2),
+                new Vector3f(-shape.w/2,-shape.h/2,-shape.d/2).rotateZ(shape.radians),
                 new Quaternionf().rotationZ(shape.radians),
                 new Vector3f(shape.w,shape.h,shape.d),
                 new Quaternionf()));
