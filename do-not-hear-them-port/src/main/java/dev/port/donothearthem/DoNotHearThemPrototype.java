@@ -243,6 +243,12 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                     for(int i=0;i<3;i++) bone(s,side*.45f,-1.62f,side*(.71f+i*.1f),-1.82f,.15f,.10f,.01f,2,0);
                 }
                 for(int i=0;i<6;i++) piece(s,-.55f+i*.22f,.06f+i%2*.12f,-.63f,.15f,.36f,.19f,i%2==0?-27:26,2,0);
+                // Thin ribbed relief on both flanks and inset jaw plates.
+                for(int side:new int[]{-1,1}) {
+                    for(int i=0;i<3;i++) bone(s,side*.29f,-.06f-i*.19f,
+                        side*.56f,-.18f-i*.19f,.13f,.09f,-.64f,1,0);
+                    bone(s,side*.12f,.32f,side*.22f,.06f,.15f,.09f,.04f,2,1);
+                }
             }
             case FOREST -> {
                 // Forest Hollow v12: connected organic torso, integrated shoulders and crown.
@@ -305,6 +311,13 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 piece(s,-.46f,.42f,-.35f,.20f,.76f,.31f,-19,0,0);
                 piece(s,.46f,.42f,-.35f,.20f,.76f,.31f,19,0,0);
                 piece(s,0,-.24f,.06f,.10f,1.24f,.11f,0,1,0);
+                // Slim asymmetric seams and inset eye relief, instead of one smooth coat.
+                for (int i=0;i<4;i++) {
+                    float x=(i-1.5f)*.14f;
+                    piece(s,x,-.35f-(i%2)*.15f,.14f,.065f,1.11f,.065f,(i-2)*3,1,0);
+                }
+                piece(s,-.13f,.68f,.11f,.095f,.075f,.055f,0,0,1);
+                piece(s,.13f,.68f,.11f,.095f,.075f,.055f,0,0,1);
             }
             case SLEEP -> {
                 // Hollow floating wraith with drifting, hanging cloth-like segments and thin talons.
@@ -323,6 +336,12 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                     bone(s,side*.98f,-1.22f,side*(1.17f+i*.10f),-1.54f,.08f,.06f,-.1f,2,side<0?2:3);
                 piece(s,-.37f,.33f,-.62f,.24f,.88f,.13f,-21,2,0);
                 piece(s,.37f,.33f,-.62f,.24f,.88f,.13f,21,2,0);
+                for (int i=0;i<5;i++) {
+                    float x=(i-2)*.20f;
+                    bone(s,x,-.96f,x*.75f,-1.81f-(i%2)*.17f,.14f,.105f,-.48f,2,7);
+                }
+                piece(s,-.16f,.89f,.13f,.075f,.08f,.06f,0,2,1);
+                piece(s,.16f,.89f,.13f,.075f,.08f,.06f,0,2,1);
             }
         }
         return s;
