@@ -33,6 +33,11 @@ jobs:
                   if n.endswith('.json') and (n.startswith('assets/') or n == 'fabric.mod.json'):
                       print('REFERENCE RESOURCE:',n,z.read(n)[:1200].decode('utf-8','replace'))
           PY
+      - name: Check reference message constants
+        continue-on-error: true
+        run: |
+          javap -c -p -classpath /tmp/horrormessages-original.jar net.mcreator.horrormessages.procedures.SendhorrormessageProcedure | grep '// String' | head -120 || true
+          javap -c -p -classpath /tmp/horrormessages-original.jar net.mcreator.horrormessages.procedures.HorrorMessagesProcedure | grep '// String' | head -120 || true
       - name: Compile and package
         run: gradle --no-daemon clean build --stacktrace
       - uses: actions/upload-artifact@v4
