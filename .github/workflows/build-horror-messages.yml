@@ -2,6 +2,8 @@ name: Build Horror Messages Fabric 26.2
 on:
   push:
     branches: ['port/horror-messages-fabric-26.2']
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 jobs:
   build:
