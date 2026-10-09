@@ -232,8 +232,15 @@ public final class DoNotHearThemPrototype implements ModInitializer {
             {-0.18f,-0.80f,0.34f,0.36f,0.56f,0.14f}  // front relief
         };
         List<Display.BlockDisplay> displays = new ArrayList<>();
+        EntityType<?> registeredType = BuiltInRegistries.ENTITY_TYPE.getValue(
+            Identifier.fromNamespaceAndPath("minecraft", "block_display"));
+        if (registeredType == null) {
+            player.sendSystemMessage(Component.literal("[DNHT v8] 3D display unavailable; sprite mode remains active."));
+            return;
+        }
         for (int i=0;i<parts.length;i++) {
-            Display.BlockDisplay part = ((EntityType<Display.BlockDisplay>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.fromNamespaceAndPath("minecraft", "block_display"))).create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+            Display.BlockDisplay part = (Display.BlockDisplay) registeredType.create(
+                level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
             if (part == null) continue;
             float[] p = parts[i];
             part.setBlockState(i >= 6 ? secondary : surface);
