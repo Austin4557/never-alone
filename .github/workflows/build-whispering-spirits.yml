@@ -2,6 +2,8 @@ name: Build Whispering Spirits Fabric 26.2
 on:
   push:
     branches: ['port/whispering-spirits-fabric-26.2']
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 jobs:
   build:
