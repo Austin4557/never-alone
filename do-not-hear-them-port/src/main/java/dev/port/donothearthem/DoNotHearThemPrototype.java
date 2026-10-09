@@ -91,18 +91,54 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                         && level.clip(new ClipContext(player.getEyePosition(), encounter.location,
                             ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getType() == HitResult.Type.MISS;
                     int observedTicks = observed ? encounter.observedTicks + 10 : Math.max(0, encounter.observedTicks - 10);
-                    // Stalkers grow more visible when ignored and vanish after sustained observation.
-                    if (observedTicks >= 30) {
-                        level.sendParticles(player, ParticleTypes.POOF, true, false,
-                            encounter.location.x, encounter.location.y, encounter.location.z,
+                    int elapsedTicks = Math.max(0, 500 - encounter.remainingTicks);
+                    Vec3 nextLocation = encounter.location;
+                    int sightThreshold = switch (encounter.kind) {
+                        case CAVE -> 50;     // Keeps advancing until faced down.
+                        case FOREST -> 20;   // Vanishes almost immediately when spotted.
+                        case WINDOW -> 70;   // Holds its stare before slipping away.
+                        case SLEEP -> 40;    // Floats, then dissolves.
+                    };
+
+                    if (encounter.kind == EncounterKind.CAVE && !observed) {
+                        Vec3 move = player.position().subtract(encounter.location);
+                        if (move.lengthSqr() > 5.0 * 5.0) {
+                            Vec3 horizontal = new Vec3(move.x, 0, move.z).normalize();
+                            Vec3 attempt = encounter.location.add(horizontal.scale(.17));
+                            if (level.getBlockState(BlockPos.containing(attempt)).isAir())
+                                nextLocation = attempt;
+                        } else {
+                            observedTicks = sightThreshold;
+                        }
+                    } else if (encounter.kind == EncounterKind.FOREST && !observed
+                               && elapsedTicks > 0 && elapsedTicks % 100 == 0) {
+                        // Briefly steps sideways, as though weaving between distant trees.
+                        Vec3 side = player.getLookAngle();
+                        Vec3 horizontal = new Vec3(-side.z, 0, side.x).normalize();
+                        Vec3 attempt = encounter.location.add(horizontal.scale(level.getRandom().nextBoolean() ? 3 : -3));
+                        if (level.hasChunkAt(BlockPos.containing(attempt))
+                            && level.getBlockState(BlockPos.containing(attempt)).isAir()) {
+                            nextLocation = attempt;
+                        }
+                    } else if (encounter.kind == EncounterKind.SLEEP) {
+                        // Levitation and soft side-to-side movement; no grounded footsteps.
+                        double bob = Math.sin(elapsedTicks * .11) * .055;
+                        nextLocation = encounter.location.add(Math.sin(elapsedTicks * .07) * .04, bob, 0);
+                    }
+                    if (observedTicks >= sightThreshold) {
+                        level.sendParticles(player, encounter.kind == EncounterKind.SLEEP
+                                ? ParticleTypes.SOUL : ParticleTypes.POOF, true, false,
+                            nextLocation.x, nextLocation.y, nextLocation.z,
                             8, .35, .8, .35, .02);
-                        sendSound(player, level, encounter.location);
+                        sendSound(player, level, nextLocation);
                         ENCOUNTERS.remove(id);
                         continue;
                     }
-                    if (tick % 10 == 0) render(player, level, encounter);
+                    if (tick % 10 == 0) render(player, level,
+                        new Encounter(encounter.kind, encounter.dimension,
+                                      nextLocation, encounter.remainingTicks, observedTicks));
                     ENCOUNTERS.put(id, new Encounter(encounter.kind, encounter.dimension,
-                            encounter.location, encounter.remainingTicks-10, observedTicks));
+                            nextLocation, encounter.remainingTicks - 10, observedTicks));
                     continue;
                 }
                 int cooldown = COOLDOWNS.getOrDefault(id, 0);
@@ -132,7 +168,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         Vec3 location=new Vec3(feet.getX()+.5,feet.getY()+1.4,feet.getZ()+.5);
         ENCOUNTERS.put(player.getUUID(),new Encounter(kind,level.dimension().identifier().toString(),location,500,0));
         COOLDOWNS.put(player.getUUID(),2400);
-        player.sendSystemMessage(Component.literal("[DNHT test] " + kind.name().toLowerCase() + " stalker spawned to your LEFT, around eight blocks away. Turn and look for a dark human-shaped figure."));
+        player.sendSystemMessage(Component.literal("[DNHT v6] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
         sendSound(player,level,location);
         render(player,level,ENCOUNTERS.get(player.getUUID()));
         return 1;
