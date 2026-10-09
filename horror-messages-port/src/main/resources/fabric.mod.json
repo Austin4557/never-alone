@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "horrormessages",
+  "version": "1.0.1-fabric26.2-test1",
+  "name": "Horror Messages (Fabric 26.2 Port)",
+  "description": "Psychological horror chat messages. Standalone recreation for Fabric 26.2.",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.port.horrormessages.HorrorMessages"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "26.2",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
