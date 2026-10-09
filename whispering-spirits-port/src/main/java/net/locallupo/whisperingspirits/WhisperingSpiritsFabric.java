@@ -6,6 +6,7 @@ import static net.minecraft.commands.Commands.literal;
 import net.minecraft.network.chat.Component;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 
 public final class WhisperingSpiritsFabric implements ModInitializer {
     private static final String MOD_ID = "whispering_spirits";
-    public static final SimpleParticleType WATCHER_EYES_PARTICLE = new SimpleParticleType(false);
+    public static final SimpleParticleType WATCHER_EYES_PARTICLE = FabricParticleTypes.simple();
     private static final int TICKS_PER_CHECK = 10;
     private static final int MIN_COOLDOWN_AFTER_DESPAWN = 800;
     private static final double MAX_VIEW_DISTANCE = 40.0;
