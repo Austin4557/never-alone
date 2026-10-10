@@ -193,7 +193,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         spawnBody(player, level, location, kind);
         ENCOUNTERS.put(player.getUUID(),new Encounter(kind,level.dimension().identifier().toString(),location,kind==EncounterKind.FOREST?1200:500,0));
         COOLDOWNS.put(player.getUUID(),2400);
-        player.sendSystemMessage(Component.literal("[DNHT v18] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
+        player.sendSystemMessage(Component.literal("[DNHT v19] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
         sendSound(player,level,location);
         render(player,level,ENCOUNTERS.get(player.getUUID()));
         return 1;
@@ -432,35 +432,84 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                                      EncounterKind kind, int elapsed) {
         Shape shape = body.shape();
         int motion = shape.motion();
-        double breathe = Math.sin(elapsed * .10) * .028;
-        double armSway = Math.sin(elapsed * .09) * .052;
-        double localX = shape.x() + (motion == 2 ? -armSway : motion == 3 ? armSway : 0);
-        double localY = shape.y()
-            + ((motion == 0 || motion == 1) ? breathe : 0)
-            + (kind == EncounterKind.SLEEP ? Math.sin(elapsed * .056) * .09 : 0);
-        double localZ = shape.z() + (motion == 7
-            ? Math.sin(elapsed * .075 + shape.x() * 4) * .055 : 0);
-        double cos = Math.cos(facing), sin = Math.sin(facing);
-        // Rotate each bone's offset around the creature's shared root.
-        // Rotating only the display texture would leave the parts disconnected.
-        body.entity().setPos(
-            origin.x + localX * cos + localZ * sin,
-            origin.y + localY,
-            origin.z - localX * sin + localZ * cos);
 
-        Quaternionf rotation = new Quaternionf().rotationY(facing).rotateZ(shape.radians());
-        Vector3f halfSize = new Vector3f(-shape.w() / 2, -shape.h() / 2,
-                                       -shape.d() / 2).rotate(rotation);
-        body.entity().setTransformation(new Transformation(
-            halfSize, rotation, new Vector3f(shape.w(), shape.h(), shape.d()),
-            new Quaternionf()));
+        // Every model remains a connected 3D figure: all bones use one root-facing
+        // angle and subtle, kind-specific movements rather than independent spins.
+        double time = elapsed * .043;
+        double breath = Math.sin(time) * switch (kind) {
+            case CAVE -> .046;
+            case FOREST -> .022;
+            case WINDOW -> .011;
+            case SLEEP -> .037;
+        };
+        double armSwing = Math.sin(time * .75 + (motion == 2 ? .5 : -.5))
+            * switch (kind) {
+                case CAVE -> .083;
+                case FOREST -> .039;
+                case WINDOW -> .018;
+                case SLEEP -> .106;
+            };
+        double headTilt = Math.sin(time * .38 + .7) * switch (kind) {
+            case CAVE -> .031;
+            case FOREST -> .063;
+            case WINDOW -> .043;
+            case SLEEP -> .072;
+        };
+        double legShift = Math.sin(time * .74 + (motion == 4 ? 0 : Math.PI)) *
+            (kind == EncounterKind.CAVE ? .026 : kind == EncounterKind.SLEEP ? .024 : .008);
+
+        double x = shape.x();
+        double y = shape.y();
+        double z = shape.z();
+        double angle = shape.radians();
+        double pitch = 0;
+        if (motion == 0) {
+            y += breath * .48;
+        } else if (motion == 1 || motion == 6) {
+            // Antlers and crown move in sync with the head, avoiding detached parts.
+            y += breath * .45;
+            x += headTilt * .08;
+            angle += headTilt;
+            pitch = Math.sin(time * .3) * .021;
+        } else if (motion == 2 || motion == 3) {
+            double direction = motion == 2 ? -1 : 1;
+            x += direction * armSwing * .38;
+            y += Math.sin(time * .8) * .016;
+            angle += direction * armSwing * .54;
+            pitch = armSwing * .20;
+        } else if (motion == 4 || motion == 5) {
+            y += legShift;
+            angle += legShift * .24;
+        } else if (motion == 7) {
+            x += Math.sin(time*.62 + x * 3.5) * .048;
+            z += Math.sin(time*.52 + x * 4.2) * .047;
+            angle += Math.sin(time*.54 + x * 2.4) * .043;
+        }
+        if (kind == EncounterKind.SLEEP) {
+            y += Math.sin(time * .61) * .086;
+        }
+
+        double cos = Math.cos(facing), sin = Math.sin(facing);
+        body.entity().setPos(origin.x + x * cos + z * sin,
+                             origin.y + y,
+                             origin.z - x * sin + z * cos);
+
+        Quaternionf rotation = new Quaternionf()
+            .rotationY(facing).rotateZ((float)angle).rotateX((float)pitch);
+        Vector3f halfSize = new Vector3f(-shape.w()/2, -shape.h()/2,
+                                         -shape.d()/2).rotate(rotation);
+        // A very small torso scale pulse adds breathing without distorting
+        // the face material or pulling the connecting limbs out of place.
+        float pulse = motion == 0 ? 1f + (float)(breath * .022) : 1f;
+        body.entity().setTransformation(new Transformation(halfSize, rotation,
+            new Vector3f(shape.w()*pulse, shape.h(), shape.d()*pulse), new Quaternionf()));
     }
 
     private static void spawnBody(ServerPlayer player, ServerLevel level, Vec3 origin, EncounterKind kind) {
         EntityType<?> registeredType = BuiltInRegistries.ENTITY_TYPE.getValue(
             Identifier.fromNamespaceAndPath("minecraft", "block_display"));
         if (registeredType == null) {
-            player.sendSystemMessage(Component.literal("[DNHT v18] 3D display unavailable; sprite mode active."));
+            player.sendSystemMessage(Component.literal("[DNHT v19] 3D display unavailable; sprite mode active."));
             return;
         }
         float facing = facePlayer(player, origin);
@@ -470,6 +519,9 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
             if (display == null) continue;
             display.setBlockState(blockFor(kind, shape.material()));
+            // Interpolate server updates to avoid visible 10-tick jerks.
+            display.setTransformationInterpolationDuration(10);
+            display.setTeleportDuration(10);
             BodyPart part = new BodyPart(display, shape);
             poseBodyPart(part, origin, facing, kind, 0);
             level.addFreshEntity(display);
@@ -486,7 +538,8 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         float desired = facePlayer(player, origin);
         // Shortest angular path; avoid instant spins when the player runs around it.
         float difference = (float) Math.atan2(Math.sin(desired-current), Math.cos(desired-current));
-        float turn = Math.max(-.12f, Math.min(.12f, difference));
+        float ease = difference * .29f;
+        float turn = Math.max(-.15f, Math.min(.15f, ease));
         float facing = current + turn;
         BODY_FACING.put(player.getUUID(), facing);
         for (BodyPart part : parts) poseBodyPart(part, origin, facing, kind, elapsed);
