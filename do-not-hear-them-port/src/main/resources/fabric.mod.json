@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "id": "donothearthemprototype",
-  "version": "0.8.0-fabric26.2-v15",
+  "version": "0.9.1-fabric26.2-v17",
   "name": "Do Not Hear Them — Fabric Encounter Prototype",
-  "description": "Forest Hollow material/geometry artifact fixes and 128x128 opaque original surface textures for four 3D stalkers.",
+  "description": "Redesigned independent 3D stalkers with four distinct original-inspired silhouettes and custom illustrated 3D faces.",
   "environment": "*",
   "entrypoints": {
     "main": [
