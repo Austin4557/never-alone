@@ -519,9 +519,8 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
             if (display == null) continue;
             display.setBlockState(blockFor(kind, shape.material()));
-            // Interpolate server updates to avoid visible 10-tick jerks.
+            // Animate model transformations smoothly between server updates.
             display.setTransformationInterpolationDuration(10);
-            display.setTeleportDuration(10);
             BodyPart part = new BodyPart(display, shape);
             poseBodyPart(part, origin, facing, kind, 0);
             level.addFreshEntity(display);
