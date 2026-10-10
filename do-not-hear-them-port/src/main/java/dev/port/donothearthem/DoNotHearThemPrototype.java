@@ -271,6 +271,12 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 for(int i=0;i<4;i++)
                     piece(s,(i-1.5f)*.23f,-.05f-i%2*.16f,-.52f,
                         .15f,.45f,.17f,(i-2)*7,1,0);
+                // Layered thoracic ridges and fractured crown details.
+                for (int side : new int[]{-1,1}) {
+                    bone(s,side*.38f,.33f,side*.52f,.08f,.12f,.09f,-.43f,1,0);
+                    bone(s,side*.27f,-.40f,side*.42f,-.78f,.13f,.08f,.07f,1,0);
+                    bone(s,side*.44f,1.60f,side*.70f,1.73f,.105f,.08f,-.33f,2,6);
+                }
             }
             case FOREST -> {
                 // CROOKED WATCHER: long bent neck, narrow rib cage, crooked
@@ -317,6 +323,12 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                     bone(s,-.29f,y,-.11f,y-.12f,.11f,.075f,.08f,1,0);
                     bone(s,.29f,y,.11f,y-.12f,.11f,.075f,.08f,1,0);
                 }
+                // Raised brow and short facial fissures without masking the skin.
+                bone(s,-.37f,1.37f,-.22f,1.52f,.075f,.060f,.085f,1,1);
+                bone(s,.04f,1.39f,.17f,1.47f,.078f,.052f,.08f,1,1);
+                piece(s,-.08f,.69f,-.004f,.065f,.12f,.065f,-15,2,1);
+                for(int side:new int[]{-1,1})
+                    bone(s,side*.17f,-.45f,side*.26f,-1.12f,.10f,.075f,.045f,1,0);
             }
             case WINDOW -> {
                 // PALE WINDOW FACE: oversized uncanny mask, almost featureless
@@ -353,6 +365,12 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                     bone(s,-.30f,y,-.19f,y-.29f,.12f,.078f,.078f,1,0);
                     bone(s,.30f,y,.19f,y-.29f,.12f,.078f,.078f,1,0);
                 }
+                // Asymmetric cloth seams and raised collar; stay clear of the face.
+                bone(s,-.44f,.25f,-.19f,-.19f,.14f,.09f,.065f,1,0);
+                bone(s,.45f,.21f,.14f,-.31f,.14f,.09f,.060f,1,0);
+                for(int i=0;i<4;i++)
+                    piece(s,-.27f+i*.19f,-1.13f-i%2*.22f,.075f,
+                        .075f,.48f,.08f,(i-2)*6,1,7);
             }
             case SLEEP -> {
                 // SLEEP FIGURE: oversized smooth pale head, pencil-thin humanoid
@@ -388,6 +406,14 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                     float y=-.29f-i*.28f;
                     piece(s,0,y,.01f,.10f,.12f,.08f,0,1,0);
                 }
+                // Very thin ridges and floating fragments around the rib cage.
+                for(int side:new int[]{-1,1}) {
+                    bone(s,side*.16f,.13f,side*.29f,-.25f,.10f,.07f,.03f,1,0);
+                    bone(s,side*.28f,-.77f,side*.40f,-1.12f,.09f,.060f,.045f,1,0);
+                }
+                for(int i=0;i<3;i++)
+                    piece(s,(i-1)*.22f,-1.33f-i*.11f,.02f,
+                        .085f,.34f,.10f,i*8,1,7);
             }
         }
         return s;
