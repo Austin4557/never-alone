@@ -55,7 +55,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
     private static final Map<UUID, List<BodyPart>> BODY_PARTS = new HashMap<>();
     // Y-axis facing for each active creature; all 3D body pieces rotate as one.
     private static final Map<UUID, Float> BODY_FACING = new HashMap<>();
-    private static final BlockState[][] CREATURE_SURFACES = new BlockState[4][4];
+    private static final BlockState[][] CREATURE_SURFACES = new BlockState[4][6];
     private MinecraftServer previousServer;
     private int tick;
 
@@ -193,7 +193,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         spawnBody(player, level, location, kind);
         ENCOUNTERS.put(player.getUUID(),new Encounter(kind,level.dimension().identifier().toString(),location,kind==EncounterKind.FOREST?1200:500,0));
         COOLDOWNS.put(player.getUUID(),2400);
-        player.sendSystemMessage(Component.literal("[DNHT v19] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
+        player.sendSystemMessage(Component.literal("[DNHT v20] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
         sendSound(player,level,location);
         render(player,level,ENCOUNTERS.get(player.getUUID()));
         return 1;
@@ -242,7 +242,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 piece(s,0,.90f,-.28f,.66f,.74f,.61f,0,0,1);
                 piece(s,0,1.02f,.065f,.43f,.42f,.17f,0,1,1);
                 piece(s,0,1.02f,.173f,.225f,.23f,.095f,0,3,1);
-                piece(s,0,1.02f,.240f,.11f,.12f,.07f,0,0,1);
+                piece(s,0,1.02f,.240f,.11f,.12f,.07f,0,0,8);
                 piece(s,0,-1.46f,-.28f,.76f,.40f,.57f,0,1,0);
                 for(int side : new int[]{-1,1}) {
                     // Uneven arm spines, but no hunched crawler silhouette.
@@ -325,8 +325,8 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 piece(s,0,.27f,-.27f,.99f,.52f,.56f,0,0,0);
                 piece(s,0,.85f,-.31f,.84f,.91f,.66f,0,3,1);
                 // Black empty eye sockets and a dark oval mouth.
-                piece(s,-.21f,.97f,.045f,.22f,.28f,.095f,0,0,1);
-                piece(s,.21f,.97f,.045f,.22f,.28f,.095f,0,0,1);
+                piece(s,-.21f,.97f,.045f,.22f,.28f,.095f,0,0,8);
+                piece(s,.21f,.97f,.045f,.22f,.28f,.095f,0,0,8);
                 piece(s,0,.51f,.06f,.27f,.23f,.105f,0,0,1);
                 for(int side:new int[]{-1,1}) {
                     piece(s,side*.48f,.15f,-.29f,.28f,.44f,.44f,side*13,0,0);
@@ -363,8 +363,8 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 piece(s,0,-1.07f,-.30f,.47f,.28f,.34f,0,0,0);
                 for(int side:new int[]{-1,1}) {
                     // Hollow black sockets with tiny lavender pinpoint pupils.
-                    piece(s,side*.21f,.98f,.015f,.22f,.27f,.095f,0,0,1);
-                    piece(s,side*.21f,1.00f,.084f,.065f,.075f,.052f,0,1,1);
+                    piece(s,side*.21f,.98f,.015f,.22f,.27f,.095f,0,0,8);
+                    piece(s,side*.21f,1.00f,.084f,.065f,.075f,.052f,0,1,8);
                     bone(s,side*.20f,.24f,side*.39f,-.69f,.19f,.16f,-.30f,0,side<0?2:3);
                     bone(s,side*.39f,-.69f,side*.53f,-1.65f,.14f,.12f,-.30f,0,side<0?2:3);
                     for(int i=0;i<4;i++)
@@ -401,7 +401,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
     private static void registerCreatureSurfaces() {
         String[] kinds = {"cave", "forest", "window", "sleep"};
         for (int k = 0; k < kinds.length; k++) {
-            for (int material = 0; material < 4; material++) {
+            for (int material = 0; material < 6; material++) {
                 Identifier id = Identifier.fromNamespaceAndPath(
                     "donothearthemprototype", "skin_" + kinds[k] + "_" + material);
                 ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, id);
@@ -419,8 +419,24 @@ public final class DoNotHearThemPrototype implements ModInitializer {
             case WINDOW -> 2;
             case SLEEP -> 3;
         };
-        return CREATURE_SURFACES[kindIndex][Math.max(0,Math.min(3,material))];
+        return CREATURE_SURFACES[kindIndex][Math.max(0,Math.min(5,material))];
     }
+    // Per-creature blink rhythms make them feel alive without requiring
+    // client-only animation hooks or large, flickering full-body sprites.
+    private static int faceFrame(EncounterKind kind, int elapsed) {
+        int period = switch (kind) {
+            case CAVE -> 180;
+            case FOREST -> 150;
+            case WINDOW -> 260;
+            case SLEEP -> 120;
+        };
+        int phase = Math.floorMod(elapsed + period - 40, period);
+        if (phase < 10) return 4;  // half-lidded
+        if (phase < 20) return 5;  // closed
+        if (phase < 30) return 4;  // opening
+        return 3;                  // open
+    }
+
     private static float facePlayer(ServerPlayer player, Vec3 origin) {
         Vec3 toPlayer = player.getEyePosition().subtract(origin);
         // The model's detailed front points toward positive local Z.
@@ -465,7 +481,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         double pitch = 0;
         if (motion == 0) {
             y += breath * .48;
-        } else if (motion == 1 || motion == 6) {
+        } else if (motion == 1 || motion == 6 || motion == 8) {
             // Antlers and crown move in sync with the head, avoiding detached parts.
             y += breath * .45;
             x += headTilt * .08;
@@ -496,20 +512,23 @@ public final class DoNotHearThemPrototype implements ModInitializer {
 
         Quaternionf rotation = new Quaternionf()
             .rotationY(facing).rotateZ((float)angle).rotateX((float)pitch);
-        Vector3f halfSize = new Vector3f(-shape.w()/2, -shape.h()/2,
+        // Blink by slightly compressing only protruding eye details; retain
+        // the whole skull in place, including all crown and cheek segments.
+        int frame = faceFrame(kind, elapsed);
+        float eyeHeight = motion == 8 ? (frame == 5 ? .12f : frame == 4 ? .52f : 1f) : 1f;
+        float drawHeight = shape.h() * eyeHeight;
+        Vector3f halfSize = new Vector3f(-shape.w()/2, -drawHeight/2,
                                          -shape.d()/2).rotate(rotation);
-        // A very small torso scale pulse adds breathing without distorting
-        // the face material or pulling the connecting limbs out of place.
         float pulse = motion == 0 ? 1f + (float)(breath * .022) : 1f;
         body.entity().setTransformation(new Transformation(halfSize, rotation,
-            new Vector3f(shape.w()*pulse, shape.h(), shape.d()*pulse), new Quaternionf()));
+            new Vector3f(shape.w()*pulse, drawHeight, shape.d()*pulse), new Quaternionf()));
     }
 
     private static void spawnBody(ServerPlayer player, ServerLevel level, Vec3 origin, EncounterKind kind) {
         EntityType<?> registeredType = BuiltInRegistries.ENTITY_TYPE.getValue(
             Identifier.fromNamespaceAndPath("minecraft", "block_display"));
         if (registeredType == null) {
-            player.sendSystemMessage(Component.literal("[DNHT v19] 3D display unavailable; sprite mode active."));
+            player.sendSystemMessage(Component.literal("[DNHT v20] 3D display unavailable; sprite mode active."));
             return;
         }
         float facing = facePlayer(player, origin);
@@ -541,7 +560,15 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         float turn = Math.max(-.15f, Math.min(.15f, ease));
         float facing = current + turn;
         BODY_FACING.put(player.getUUID(), facing);
-        for (BodyPart part : parts) poseBodyPart(part, origin, facing, kind, elapsed);
+        int face = faceFrame(kind, elapsed);
+        for (BodyPart part : parts) {
+            // Only one head display changes state: no additional entities,
+            // global resource-pack override, or per-tick registry mutations.
+            if (part.shape().material() == 3) {
+                part.entity().setBlockState(blockFor(kind, face));
+            }
+            poseBodyPart(part, origin, facing, kind, elapsed);
+        }
     }
 
     private static void clearBody(UUID id) {
