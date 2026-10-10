@@ -23,6 +23,10 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.state.BlockState;
 import com.mojang.math.Transformation;
 import org.joml.Vector3f;
@@ -49,6 +53,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
     private static final Map<UUID, Boolean> SLEEP_STATE = new HashMap<>();
     // Pure 3D segmented bodies; the illustrated sprite is a fallback if 3D spawning fails.
     private static final Map<UUID, List<BodyPart>> BODY_PARTS = new HashMap<>();
+    private static final BlockState[][] CREATURE_SURFACES = new BlockState[4][3];
     private MinecraftServer previousServer;
     private int tick;
 
@@ -57,6 +62,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Identifier.fromNamespaceAndPath("donothearthemprototype", "stalker_forest"), FOREST_SPRITE);
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Identifier.fromNamespaceAndPath("donothearthemprototype", "stalker_window"), WINDOW_SPRITE);
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Identifier.fromNamespaceAndPath("donothearthemprototype", "stalker_sleep"), SLEEP_SPRITE);
+        registerCreatureSurfaces();
         CommandRegistrationCallback.EVENT.register((dispatcher, access, selection) ->
             dispatcher.register(literal("dnht")
                 .then(literal("test")
@@ -185,7 +191,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         spawnBody(player, level, location, kind);
         ENCOUNTERS.put(player.getUUID(),new Encounter(kind,level.dimension().identifier().toString(),location,kind==EncounterKind.FOREST?1200:500,0));
         COOLDOWNS.put(player.getUUID(),2400);
-        player.sendSystemMessage(Component.literal("[DNHT v13] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
+        player.sendSystemMessage(Component.literal("[DNHT v14] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
         sendSound(player,level,location);
         render(player,level,ENCOUNTERS.get(player.getUUID()));
         return 1;
@@ -392,29 +398,31 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         }
         return s;
     }
-    private static BlockState blockFor(EncounterKind kind,int material) {
-        return switch (kind) {
-            case CAVE -> switch (material) {
-                case 0 -> Blocks.POLISHED_BLACKSTONE.defaultBlockState();
-                case 1 -> Blocks.DEEPSLATE.defaultBlockState();
-                default -> Blocks.OBSIDIAN.defaultBlockState();
-            };
-            case FOREST -> switch (material) {
-                case 0 -> Blocks.STRIPPED_DARK_OAK_LOG.defaultBlockState();
-                case 1 -> Blocks.DARK_OAK_LOG.defaultBlockState();
-                default -> Blocks.MANGROVE_ROOTS.defaultBlockState();
-            };
-            case WINDOW -> switch (material) {
-                case 0 -> Blocks.POLISHED_BLACKSTONE.defaultBlockState();
-                case 1 -> Blocks.DEEPSLATE.defaultBlockState();
-                default -> Blocks.CALCITE.defaultBlockState();
-            };
-            case SLEEP -> switch (material) {
-                case 0 -> Blocks.SCULK.defaultBlockState();
-                case 1 -> Blocks.POLISHED_BLACKSTONE.defaultBlockState();
-                default -> Blocks.AMETHYST_BLOCK.defaultBlockState();
-            };
+    // Unique 3D materials: no vanilla world textures and no world block replacements.
+    // These technical blocks have no item, are never placed in the world, and are
+    // rendered exclusively through BlockDisplay entities in the encounters.
+    private static void registerCreatureSurfaces() {
+        String[] kinds = {"cave", "forest", "window", "sleep"};
+        for (int k = 0; k < kinds.length; k++) {
+            for (int material = 0; material < 3; material++) {
+                Identifier id = Identifier.fromNamespaceAndPath(
+                    "donothearthemprototype", "skin_" + kinds[k] + "_" + material);
+                ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, id);
+                Block block = new Block(BlockBehaviour.Properties.of()
+                    .setId(key).noCollission().noOcclusion().strength(-1f));
+                Registry.register(BuiltInRegistries.BLOCK, key, block);
+                CREATURE_SURFACES[k][material] = block.defaultBlockState();
+            }
+        }
+    }
+    private static BlockState blockFor(EncounterKind kind, int material) {
+        int kindIndex = switch (kind) {
+            case CAVE -> 0;
+            case FOREST -> 1;
+            case WINDOW -> 2;
+            case SLEEP -> 3;
         };
+        return CREATURE_SURFACES[kindIndex][Math.max(0,Math.min(2,material))];
     }
     private static void spawnBody(ServerPlayer player, ServerLevel level, Vec3 origin, EncounterKind kind) {
         EntityType<?> registeredType = BuiltInRegistries.ENTITY_TYPE.getValue(
