@@ -12,10 +12,10 @@ states=root/"blockstates"
 for dest in (tex,models,states): dest.mkdir(parents=True,exist_ok=True)
 N=128
 palette={
-    "cave":[(36,40,45),(52,53,58),(22,32,37)],
-    "forest":[(57,47,33),(69,55,39),(40,64,43)],
-    "window":[(25,26,32),(43,42,49),(152,148,149)],
-    "sleep":[(34,28,49),(53,44,70),(87,72,112)]
+    "cave":[(12,15,20),(29,29,33),(201,181,109),(218,203,142)],
+    "forest":[(9,14,12),(28,33,25),(105,109,80),(204,194,161)],
+    "window":[(14,13,20),(40,36,48),(175,173,170),(210,211,205)],
+    "sleep":[(14,13,24),(40,38,54),(108,103,137),(187,184,194)]
 }
 
 def field(rng):
@@ -107,6 +107,53 @@ def marks(overlay,rng,kind,variant):
             d.arc((x-8,y-6,x+25,y+24),rng.randrange(90),rng.randrange(150,270),
                   fill=(146,117,185,30),width=2)
 
+
+def face_texture(kind,base):
+    """Original *new* illustration for the face surface, not extracted mod artwork."""
+    image=Image.new("RGB",(N,N),base)
+    d=ImageDraw.Draw(image)
+    if kind=="cave":
+        # Cyclopean sun-eye, with the rays coming from 3D geometry.
+        d.ellipse((18,27,110,101),fill=(51,42,23))
+        d.ellipse((26,34,102,93),fill=(239,223,170))
+        d.ellipse((43,34,86,94),fill=(172,144,91))
+        d.ellipse((55,37,78,92),fill=(17,20,21))
+        d.ellipse((61,43,69,59),fill=(249,245,212))
+        for x in (24,100):
+            d.arc((x-10,17,x+10,111),70,285,fill=(246,228,165),width=3)
+    elif kind=="forest":
+        # Narrow, pale wooden skull-mask. Retain dark forest creature around it.
+        d.polygon([(33,13),(89,13),(104,45),(94,103),(64,118),
+                   (31,98),(22,43)],fill=(210,203,173))
+        d.ellipse((31,42,55,76),fill=(12,17,13))
+        d.ellipse((72,42,96,76),fill=(12,17,13))
+        d.ellipse((41,55,47,64),fill=(230,173,68))
+        d.ellipse((82,55,88,64),fill=(230,173,68))
+        d.polygon([(63,73),(55,91),(68,93)],fill=(35,36,27))
+        for x in (47,59,71,83):
+            d.line((x,97,x-2,106),fill=(60,58,45),width=2)
+    elif kind=="window":
+        # Oversized smooth watcher mask, hollow eye sockets, unnerving smile.
+        d.ellipse((13,6,115,124),fill=(223,224,216))
+        d.ellipse((24,26,58,75),fill=(12,11,16))
+        d.ellipse((70,26,104,75),fill=(12,11,16))
+        d.ellipse((34,32,43,47),fill=(241,241,226))
+        d.ellipse((82,32,91,47),fill=(241,241,226))
+        d.polygon([(64,65),(55,84),(71,83)],fill=(88,83,87))
+        d.arc((31,64,97,113),6,174,fill=(18,15,22),width=9)
+        for x in range(42,91,11):
+            d.line((x,91,x+1,101),fill=(231,227,211),width=2)
+    else:
+        # Pale, almost-featureless sleep apparition with deep eyes.
+        d.ellipse((17,8,111,120),fill=(197,194,209))
+        d.ellipse((28,36,55,85),fill=(12,11,21))
+        d.ellipse((72,36,99,85),fill=(12,11,21))
+        d.ellipse((38,52,45,64),fill=(173,168,214))
+        d.ellipse((82,52,89,64),fill=(173,168,214))
+        d.line((58,98,72,98),fill=(37,32,48),width=3)
+    return image
+
+
 for kind,colors in palette.items():
     for variant,rgb in enumerate(colors):
         rng=random.Random(1601+sum(map(ord,kind))*19+variant*91)
@@ -116,11 +163,23 @@ for kind,colors in palette.items():
         image=Image.alpha_composite(image,layer).convert("RGB")
         name=f"skin_{kind}_{variant}"
         image.save(tex/(name+".png"),optimize=True)
-        (models/(name+".json")).write_text(json.dumps({
-            "parent":"minecraft:block/cube_all",
-            "textures":{"all":f"donothearthemprototype:block/{name}"},
-            "ambientocclusion":False
-        }))
+        if variant==3:
+            front_name=name+"_front"
+            face_texture(kind,rgb).save(tex/(front_name+".png"),optimize=True)
+            side=f"donothearthemprototype:block/{name}"
+            front=f"donothearthemprototype:block/{front_name}"
+            (models/(name+".json")).write_text(json.dumps({
+                "parent":"minecraft:block/cube",
+                "textures":{"down":side,"up":side,"east":side,"west":side,
+                            "north":front,"south":front,"particle":side},
+                "ambientocclusion":False
+            }))
+        else:
+            (models/(name+".json")).write_text(json.dumps({
+                "parent":"minecraft:block/cube_all",
+                "textures":{"all":f"donothearthemprototype:block/{name}"},
+                "ambientocclusion":False
+            }))
         (states/(name+".json")).write_text(json.dumps({
             "variants":{"":{"model":f"donothearthemprototype:block/{name}"}}
         }))
