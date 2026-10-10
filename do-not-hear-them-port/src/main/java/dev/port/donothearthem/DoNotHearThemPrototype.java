@@ -47,7 +47,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
     private static final Map<UUID, Encounter> ENCOUNTERS = new HashMap<>();
     private static final Map<UUID, Integer> COOLDOWNS = new HashMap<>();
     private static final Map<UUID, Boolean> SLEEP_STATE = new HashMap<>();
-    // Solid vanilla BlockDisplay parts supplement the high-detail sprite with true spatial depth.
+    // Pure 3D segmented bodies; the illustrated sprite is a fallback if 3D spawning fails.
     private static final Map<UUID, List<BodyPart>> BODY_PARTS = new HashMap<>();
     private MinecraftServer previousServer;
     private int tick;
@@ -185,7 +185,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         spawnBody(player, level, location, kind);
         ENCOUNTERS.put(player.getUUID(),new Encounter(kind,level.dimension().identifier().toString(),location,kind==EncounterKind.FOREST?1200:500,0));
         COOLDOWNS.put(player.getUUID(),2400);
-        player.sendSystemMessage(Component.literal("[DNHT v12] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
+        player.sendSystemMessage(Component.literal("[DNHT v13] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
         sendSound(player,level,location);
         render(player,level,ENCOUNTERS.get(player.getUUID()));
         return 1;
@@ -248,6 +248,14 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                     for(int i=0;i<3;i++) bone(s,side*.29f,-.06f-i*.19f,
                         side*.56f,-.18f-i*.19f,.13f,.09f,-.64f,1,0);
                     bone(s,side*.12f,.32f,side*.22f,.06f,.15f,.09f,.04f,2,1);
+                    // Broken shell shards interlock along the back and large claws.
+                    bone(s,side*.49f,.28f,side*.76f,.66f,.20f,.14f,-.55f,2,0);
+                    bone(s,side*.82f,.44f,side*.99f,.72f,.15f,.11f,-.57f,1,0);
+                    piece(s,side*.37f,-.40f,-.67f,.18f,.36f,.09f,side*17,1,0);
+                }
+                for(int i=0;i<4;i++) {
+                    float x=-.3f+i*.20f;
+                    bone(s,x,.44f,x*.84f,-.10f,.13f,.12f,.06f,2,1);
                 }
             }
             case FOREST -> {
@@ -284,6 +292,19 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                     for(int i=0;i<3;i++) bone(s,side*.20f,.18f-i*.22f,
                         side*.04f,-.26f-i*.19f,.15f,.10f,-.65f,2,0);
                 }
+                // Layered tapered chest ridge and root fibers, backed by the solid trunk.
+                piece(s,0,.21f,-.71f,.36f,.50f,.15f,0,1,0);
+                piece(s,0,-.37f,-.72f,.27f,.69f,.12f,0,0,0);
+                for(int side : new int[]{-1,1}) {
+                    // Mask cheeks, brow and tiny luminous eye sockets.
+                    bone(s,side*.07f,1.04f,side*.19f,.84f,.11f,.065f,-.075f,2,1);
+                    bone(s,side*.04f,1.20f,side*.23f,1.17f,.12f,.11f,-.09f,1,1);
+                    piece(s,side*.125f,1.065f,-.005f,.07f,.07f,.07f,0,2,1);
+                    // Ragged moss fringe physically touches each clavicle.
+                    for(int i=0;i<3;i++)
+                        bone(s,side*(.23f+i*.10f),.29f,side*(.25f+i*.10f),-.06f-i*.06f,
+                            .11f,.065f,-.68f,2,0);
+                }
                 // Trunk ridges and hanging moss, intentionally embedded in torso.
                 for(int i=0;i<7;i++) {
                     float x=-.28f+i*.093f;
@@ -318,6 +339,18 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 }
                 piece(s,-.13f,.68f,.11f,.095f,.075f,.055f,0,0,1);
                 piece(s,.13f,.68f,.11f,.095f,.075f,.055f,0,0,1);
+                // Distinct hood perimeter, raised nose, sunken face and segmented belt.
+                bone(s,-.32f,.85f,-.29f,.30f,.15f,.11f,-.04f,0,1);
+                bone(s,.32f,.85f,.29f,.30f,.15f,.11f,-.04f,0,1);
+                bone(s,-.30f,.92f,.30f,.92f,.17f,.12f,-.05f,0,1);
+                piece(s,0,.52f,.20f,.075f,.23f,.07f,0,2,1);
+                piece(s,0,.19f,.15f,.18f,.055f,.05f,0,0,1);
+                for(int i=0;i<5;i++)
+                    piece(s,-.34f+i*.17f,-.64f,.18f,.13f,.11f,.08f,0,i%2==0?1:0,0);
+                for(int side:new int[]{-1,1})
+                    for(int i=0;i<3;i++)
+                        bone(s,side*(.46f+i*.025f),-.25f-i*.26f,
+                            side*(.48f+i*.03f),-.52f-i*.28f,.11f,.07f,-.61f,1,0);
             }
             case SLEEP -> {
                 // Hollow floating wraith with drifting, hanging cloth-like segments and thin talons.
@@ -342,6 +375,19 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 }
                 piece(s,-.16f,.89f,.13f,.075f,.08f,.06f,0,2,1);
                 piece(s,.16f,.89f,.13f,.075f,.08f,.06f,0,2,1);
+                // Layered hood border, hollow center and twisting spectral ribs.
+                bone(s,-.36f,1.06f,-.24f,.58f,.16f,.105f,-.07f,2,1);
+                bone(s,.36f,1.06f,.24f,.58f,.16f,.105f,-.07f,2,1);
+                bone(s,-.29f,1.13f,.29f,1.13f,.16f,.11f,-.07f,1,1);
+                for(int side:new int[]{-1,1}) {
+                    for(int i=0;i<4;i++) {
+                        float y=.31f-i*.16f;
+                        bone(s,side*.32f,y,side*.07f,y-.12f,.12f,.075f,-.67f,2,0);
+                    }
+                    bone(s,side*.26f,-.49f,side*.67f,-1.13f,.15f,.085f,-.64f,2,7);
+                }
+                for(int i=0;i<4;i++)
+                    bone(s,(i-1.5f)*.18f,-1.20f,(i-1.5f)*.30f,-1.83f-i*.09f,.10f,.06f,-.66f,1,7);
             }
         }
         return s;
