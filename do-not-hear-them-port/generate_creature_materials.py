@@ -12,10 +12,10 @@ states=root/"blockstates"
 for dest in (tex,models,states): dest.mkdir(parents=True,exist_ok=True)
 N=128
 palette={
-    "cave":[(12,15,20),(29,29,33),(201,181,109),(218,203,142)],
-    "forest":[(9,14,12),(28,33,25),(105,109,80),(204,194,161)],
-    "window":[(14,13,20),(40,36,48),(175,173,170),(210,211,205)],
-    "sleep":[(14,13,24),(40,38,54),(108,103,137),(187,184,194)]
+    "cave":[(12,15,20),(29,29,33),(201,181,109),(218,203,142),(218,203,142),(218,203,142)],
+    "forest":[(9,14,12),(28,33,25),(105,109,80),(204,194,161),(204,194,161),(204,194,161)],
+    "window":[(14,13,20),(40,36,48),(175,173,170),(210,211,205),(210,211,205),(210,211,205)],
+    "sleep":[(14,13,24),(40,38,54),(108,103,137),(187,184,194),(187,184,194),(187,184,194)]
 }
 
 def field(rng):
@@ -108,7 +108,7 @@ def marks(overlay,rng,kind,variant):
                   fill=(146,117,185,30),width=2)
 
 
-def face_texture(kind,base):
+def face_texture(kind,base,blink=0):
     """Original *new* illustration for the face surface, not extracted mod artwork."""
     image=Image.new("RGB",(N,N),base)
     d=ImageDraw.Draw(image)
@@ -206,6 +206,37 @@ def face_texture(kind,base):
             y=rng.randrange(165,228)
             d.line((x,y,x+rng.randrange(-8,9),y+rng.randrange(4,14)),
                    fill=(164,158,187),width=1)
+    # Preserve the full mask and move only the lids. These are truly different
+    # face textures, switched by server-side head block-display state.
+    if blink:
+        sockets = {
+            "cave":[(69,79,191,175)],
+            "forest":[(62,84,110,151),(144,84,192,151)],
+            "window":[(48,51,117,150),(139,51,209,150)],
+            "sleep":[(56,70,111,171),(144,70,198,171)]
+        }
+        skin = {
+            "cave":(165,144,96),
+            "forest":(187,177,146),
+            "window":(220,221,214),
+            "sleep":(190,186,201)
+        }[kind]
+        crease = {
+            "cave":(80,61,40),"forest":(69,64,50),
+            "window":(95,88,91),"sleep":(104,98,123)
+        }[kind]
+        for x0,y0,x1,y1 in sockets[kind]:
+            height=y1-y0
+            if blink==1:  # half-lidded
+                lid_bottom=y0+round(height*.68)
+                d.rounded_rectangle((x0,y0,x1,lid_bottom),radius=5,fill=skin)
+                d.line((x0+5,lid_bottom,x1-5,lid_bottom+2),fill=crease,width=3)
+            else: # eyes shut
+                d.rounded_rectangle((x0,y0,x1,y1),radius=6,fill=skin)
+                yy=y0+round(height*.60)
+                d.arc((x0+1,yy-7,x1-1,yy+11),2,176,fill=crease,width=4)
+        if kind=="cave" and blink==2:
+            d.arc((61,70,194,194),15,175,fill=(111,86,52),width=3)
     return image
 
 
@@ -216,17 +247,21 @@ for kind,colors in palette.items():
         layer=Image.new("RGBA",(N,N),(0,0,0,0))
         marks(layer,rng,kind,variant)
         image=Image.alpha_composite(image,layer).convert("RGB")
+        # Real 256px custom body materials: subtle high-frequency skin grain
+        # adds definition while preserving the original dark silhouette.
+        image=image.resize((256,256),Image.Resampling.LANCZOS)
         name=f"skin_{kind}_{variant}"
         image.save(tex/(name+".png"),optimize=True)
-        if variant==3:
+        if variant>=3:
             front_name=name+"_front"
-            face_texture(kind,rgb).save(tex/(front_name+".png"),optimize=True)
+            face_texture(kind,rgb,0 if variant==3 else 1 if variant==4 else 2).save(
+                tex/(front_name+".png"),optimize=True)
             side=f"donothearthemprototype:block/{name}"
             front=f"donothearthemprototype:block/{front_name}"
             (models/(name+".json")).write_text(json.dumps({
                 "parent":"minecraft:block/cube",
                 "textures":{"down":side,"up":side,"east":side,"west":side,
-                            "north":front,"south":front,"particle":side},
+                            "north":side,"south":front,"particle":side},
                 "ambientocclusion":False
             }))
         else:
@@ -238,4 +273,4 @@ for kind,colors in palette.items():
         (states/(name+".json")).write_text(json.dumps({
             "variants":{"":{"model":f"donothearthemprototype:block/{name}"}}
         }))
-        print("Generated opaque 128x128 3D material:",name)
+        print("Generated opaque 256x256 3D material:",name)
