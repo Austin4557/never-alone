@@ -191,7 +191,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         spawnBody(player, level, location, kind);
         ENCOUNTERS.put(player.getUUID(),new Encounter(kind,level.dimension().identifier().toString(),location,kind==EncounterKind.FOREST?1200:500,0));
         COOLDOWNS.put(player.getUUID(),2400);
-        player.sendSystemMessage(Component.literal("[DNHT v14] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
+        player.sendSystemMessage(Component.literal("[DNHT v15] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
         sendSound(player,level,location);
         render(player,level,ENCOUNTERS.get(player.getUUID()));
         return 1;
@@ -398,7 +398,10 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         }
         return s;
     }
-    // Unique 3D materials: no vanilla world textures and no world block replacements.
+    // Unique SOLID 3D materials: opaque and colliding block properties matter here
+    // even though no blocks are placed: the shaders should not classify these as
+    // non-occluding/translucent. Display entities themselves never have collision.
+    // No vanilla world textures or block replacements.
     // These technical blocks have no item, are never placed in the world, and are
     // rendered exclusively through BlockDisplay entities in the encounters.
     private static void registerCreatureSurfaces() {
@@ -409,7 +412,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                     "donothearthemprototype", "skin_" + kinds[k] + "_" + material);
                 ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, id);
                 Block block = new Block(BlockBehaviour.Properties.of()
-                    .setId(key).noCollision().noOcclusion().strength(-1f));
+                    .setId(key).strength(-1f));
                 Registry.register(BuiltInRegistries.BLOCK, key, block);
                 CREATURE_SURFACES[k][material] = block.defaultBlockState();
             }
@@ -428,7 +431,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         EntityType<?> registeredType = BuiltInRegistries.ENTITY_TYPE.getValue(
             Identifier.fromNamespaceAndPath("minecraft", "block_display"));
         if (registeredType == null) {
-            player.sendSystemMessage(Component.literal("[DNHT v9] 3D display unavailable; sprite mode active."));
+            player.sendSystemMessage(Component.literal("[DNHT v15] 3D display unavailable; sprite mode active."));
             return;
         }
         List<BodyPart> displays = new ArrayList<>();
