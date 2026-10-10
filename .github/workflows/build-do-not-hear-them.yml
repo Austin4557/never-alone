@@ -85,6 +85,86 @@ jobs:
           d.ellipse((35,20,39,23),fill=(190,187,251,255))
           save(im,'sleep')
           PY
+      - name: Generate unique 3D creature materials and block models
+        run: |
+          python3 - <<'PY'
+          from PIL import Image, ImageDraw, ImageFilter
+          from pathlib import Path
+          import random, math, json
+          root=Path("src/main/resources/assets/donothearthemprototype")
+          textures=root/"textures"/"block"
+          models=root/"models"/"block"
+          states=root/"blockstates"
+          for folder in (textures,models,states): folder.mkdir(parents=True,exist_ok=True)
+          palettes={
+            "cave":[(25,25,30),(37,39,43),(13,23,30)],
+            "forest":[(27,27,19),(44,43,28),(31,48,30)],
+            "window":[(17,17,22),(30,30,35),(139,130,128)],
+            "sleep":[(24,20,36),(40,32,57),(65,51,88)]
+          }
+          for kind,materials in palettes.items():
+            for variant,base in enumerate(materials):
+              rng=random.Random(1337+sum(map(ord,kind))*11+variant*47)
+              size=64
+              im=Image.new("RGBA",(size,size))
+              pixels=im.load()
+              for y in range(size):
+                for x in range(size):
+                  grain=rng.randrange(-13,14)
+                  wave=int(7*math.sin(y*.22+x*.08+variant))
+                  shade=grain+wave-6+int(10*(1-y/size))
+                  if kind=="forest": shade+=int(8*math.sin(x*.45+y*.09))
+                  if kind=="window": shade+=int(5*math.sin(x*.21))
+                  if kind=="sleep": shade+=int(8*math.sin(x*.15+y*.16))
+                  pixels[x,y]=tuple(max(0,min(255,v+shade)) for v in base)+(255,)
+              d=ImageDraw.Draw(im,"RGBA")
+              if kind=="cave":
+                for i in range(22):
+                  x=rng.randrange(0,64);y=rng.randrange(0,64)
+                  d.line([(x,y),(x+rng.randrange(-12,14),y+rng.randrange(4,16))],
+                         fill=(101,98,95,rng.randrange(45,110)),width=rng.choice((1,1,2)))
+                for i in range(7):
+                  x=rng.randrange(64);y=rng.randrange(64)
+                  d.polygon([(x,y),(x+9,y+2),(x+3,y+12)],fill=(7,9,12,85))
+              elif kind=="forest":
+                for i in range(22):
+                  x=rng.randrange(64)
+                  d.line([(x,-2),(x+int(4*math.sin(i)),66)],fill=(11,9,5,100),width=rng.choice((1,2,3)))
+                  d.line([(x+2,0),(x+2,64)],fill=(91,72,44,55),width=1)
+                if variant==2:
+                  for i in range(26):
+                    x=rng.randrange(64);y=rng.randrange(64)
+                    d.ellipse((x,y,x+4,y+3),fill=(65,96,49,rng.randrange(60,135)))
+              elif kind=="window":
+                for i in range(20):
+                  x=rng.randrange(64);y=rng.randrange(64)
+                  d.line([(x,y),(x+rng.randrange(-3,4),y+rng.randrange(8,24))],
+                         fill=(72,67,66,65),width=1)
+                if variant==2:
+                  for i in range(15):
+                    x=rng.randrange(64);y=rng.randrange(64)
+                    d.line((x,y,x+4,y+2),fill=(56,48,49,95),width=1)
+              else:
+                for i in range(12):
+                  x=rng.randrange(64);y=rng.randrange(64)
+                  d.arc((x-8,y-7,x+24,y+24),rng.randrange(180),rng.randrange(180,360),
+                        fill=(115,92,155,rng.randrange(45,130)),width=2)
+                for i in range(14):
+                  x=rng.randrange(64);y=rng.randrange(64)
+                  d.line((x,y,x+rng.randrange(-9,10),y+rng.randrange(7,16)),
+                         fill=(10,7,18,90),width=1)
+              name=f"skin_{kind}_{variant}"
+              im.save(textures/(name+".png"))
+              (models/(name+".json")).write_text(json.dumps({
+                "parent":"minecraft:block/cube_all",
+                "textures":{"all":f"donothearthemprototype:block/{name}"},
+                "ambientocclusion":False
+              }))
+              (states/(name+".json")).write_text(json.dumps({
+                "variants":{"":{"model":f"donothearthemprototype:block/{name}"}}
+              }))
+              print("Generated dedicated 3D material",name)
+          PY
       - name: Build
         run: gradle --no-daemon clean build --stacktrace
       - uses: actions/upload-artifact@v4
