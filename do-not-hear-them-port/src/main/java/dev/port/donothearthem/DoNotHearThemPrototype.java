@@ -53,7 +53,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
     private static final Map<UUID, Boolean> SLEEP_STATE = new HashMap<>();
     // Pure 3D segmented bodies; the illustrated sprite is a fallback if 3D spawning fails.
     private static final Map<UUID, List<BodyPart>> BODY_PARTS = new HashMap<>();
-    private static final BlockState[][] CREATURE_SURFACES = new BlockState[4][3];
+    private static final BlockState[][] CREATURE_SURFACES = new BlockState[4][4];
     private MinecraftServer previousServer;
     private int tick;
 
@@ -239,7 +239,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 piece(s,0,.25f,-.31f,.92f,.78f,.66f,0,0,0);
                 piece(s,0,.90f,-.28f,.66f,.74f,.61f,0,0,1);
                 piece(s,0,1.02f,.065f,.43f,.42f,.17f,0,1,1);
-                piece(s,0,1.02f,.173f,.225f,.23f,.095f,0,2,1);
+                piece(s,0,1.02f,.173f,.225f,.23f,.095f,0,3,1);
                 piece(s,0,1.02f,.240f,.11f,.12f,.07f,0,0,1);
                 piece(s,0,-1.46f,-.28f,.76f,.40f,.57f,0,1,0);
                 for(int side : new int[]{-1,1}) {
@@ -269,7 +269,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 piece(s,0,-1.10f,-.28f,.38f,.45f,.35f,0,0,0);
                 bone(s,0,.48f,-.15f,1.04f,.29f,.25f,-.30f,0,1);
                 piece(s,-.19f,1.26f,-.29f,.45f,.58f,.39f,-12,0,1);
-                piece(s,-.20f,1.20f,-.052f,.31f,.42f,.11f,-12,2,1);
+                piece(s,-.20f,1.20f,-.052f,.31f,.42f,.11f,-12,3,1);
                 for(int side :new int[]{-1,1}) {
                     // Twin crooked horns, asymmetric branch tips.
                     float sx=side*.17f-.20f;
@@ -302,7 +302,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                 // black draping body and tiny reaching fingers. Unlike forest.
                 piece(s,0,-.50f,-.28f,.78f,1.75f,.48f,0,0,0);
                 piece(s,0,.27f,-.27f,.99f,.52f,.56f,0,0,0);
-                piece(s,0,.85f,-.31f,.84f,.91f,.66f,0,2,1);
+                piece(s,0,.85f,-.31f,.84f,.91f,.66f,0,3,1);
                 // Black empty eye sockets and a dark oval mouth.
                 piece(s,-.21f,.97f,.045f,.22f,.28f,.095f,0,0,1);
                 piece(s,.21f,.97f,.045f,.22f,.28f,.095f,0,0,1);
@@ -327,7 +327,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
             case SLEEP -> {
                 // SLEEP FIGURE: oversized smooth pale head, pencil-thin humanoid
                 // torso and long hanging arms, replacing the bulky robe/wraith skirt.
-                piece(s,0,.91f,-.29f,.77f,.93f,.56f,0,2,1);
+                piece(s,0,.91f,-.29f,.77f,.93f,.56f,0,3,1);
                 piece(s,0,.42f,-.30f,.26f,.31f,.27f,0,1,1);
                 piece(s,0,-.41f,-.30f,.45f,1.37f,.35f,0,0,0);
                 piece(s,0,-1.07f,-.30f,.47f,.28f,.34f,0,0,0);
@@ -362,7 +362,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
     private static void registerCreatureSurfaces() {
         String[] kinds = {"cave", "forest", "window", "sleep"};
         for (int k = 0; k < kinds.length; k++) {
-            for (int material = 0; material < 3; material++) {
+            for (int material = 0; material < 4; material++) {
                 Identifier id = Identifier.fromNamespaceAndPath(
                     "donothearthemprototype", "skin_" + kinds[k] + "_" + material);
                 ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, id);
@@ -380,7 +380,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
             case WINDOW -> 2;
             case SLEEP -> 3;
         };
-        return CREATURE_SURFACES[kindIndex][Math.max(0,Math.min(2,material))];
+        return CREATURE_SURFACES[kindIndex][Math.max(0,Math.min(3,material))];
     }
     private static void spawnBody(ServerPlayer player, ServerLevel level, Vec3 origin, EncounterKind kind) {
         EntityType<?> registeredType = BuiltInRegistries.ENTITY_TYPE.getValue(
