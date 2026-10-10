@@ -296,11 +296,12 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                     bone(s,side*.77f,1.95f,side*1.11f,2.06f,.11f,.075f,-.37f,1,6);
                     // Rib-like root filaments overlap and weave across the torso.
                     for(int i=0;i<3;i++) bone(s,side*.20f,.18f-i*.22f,
-                        side*.04f,-.26f-i*.19f,.15f,.10f,-.65f,2,0);
+                        side*.04f,-.26f-i*.19f,.15f,.10f,-.025f,2,0);
                 }
-                // Layered tapered chest ridge and root fibers, backed by the solid trunk.
-                piece(s,0,.21f,-.71f,.36f,.50f,.15f,0,1,0);
-                piece(s,0,-.37f,-.72f,.27f,.69f,.12f,0,0,0);
+                // Front bark relief is offset forward and overlaps the torso in depth,
+                // preventing near-coplanar back-faces from fighting in shader depth buffers.
+                piece(s,0,.21f,-.02f,.36f,.50f,.15f,0,1,0);
+                piece(s,0,-.37f,-.04f,.27f,.69f,.12f,0,0,0);
                 for(int side : new int[]{-1,1}) {
                     // Mask cheeks, brow and tiny luminous eye sockets.
                     bone(s,side*.07f,1.04f,side*.19f,.84f,.11f,.065f,-.075f,2,1);
@@ -309,12 +310,13 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                     // Ragged moss fringe physically touches each clavicle.
                     for(int i=0;i<3;i++)
                         bone(s,side*(.23f+i*.10f),.29f,side*(.25f+i*.10f),-.06f-i*.06f,
-                            .11f,.065f,-.68f,2,0);
+                            .11f,.065f,-.015f,2,0);
                 }
-                // Trunk ridges and hanging moss, intentionally embedded in torso.
+                // Trunk ridges and hanging moss: protrude from the front without lying
+                // flush on any existing block face (avoids flickering/invisible bands).
                 for(int i=0;i<7;i++) {
                     float x=-.28f+i*.093f;
-                    piece(s,x,-.17f-(i%3)*.18f,-.66f,.105f,.55f,.14f,(i-3)*3,2,0);
+                    piece(s,x,-.17f-(i%3)*.18f,-.025f,.105f,.55f,.14f,(i-3)*3,2,0);
                 }
             }
             case WINDOW -> {
