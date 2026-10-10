@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "id": "donothearthemprototype",
-  "version": "0.4.0-fabric26.2-v10",
+  "version": "0.6.0-fabric26.2-v13",
   "name": "Do Not Hear Them — Fabric Encounter Prototype",
-  "description": "Four individually shaped 3D stalkers with atmospheric encounters, using a 2D fallback only if 3D display spawning fails.",
+  "description": "Independent atmospheric encounters with independently refined segmented 3D stalkers and forest model stability fixes.",
   "environment": "*",
   "entrypoints": {
     "main": [
