@@ -409,7 +409,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
                     "donothearthemprototype", "skin_" + kinds[k] + "_" + material);
                 ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, id);
                 Block block = new Block(BlockBehaviour.Properties.of()
-                    .setId(key).noCollission().noOcclusion().strength(-1f));
+                    .setId(key).noCollision().noOcclusion().strength(-1f));
                 Registry.register(BuiltInRegistries.BLOCK, key, block);
                 CREATURE_SURFACES[k][material] = block.defaultBlockState();
             }
