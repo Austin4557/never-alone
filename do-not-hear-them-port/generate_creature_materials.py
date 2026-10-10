@@ -151,6 +151,61 @@ def face_texture(kind,base):
         d.ellipse((38,52,45,64),fill=(173,168,214))
         d.ellipse((82,52,89,64),fill=(173,168,214))
         d.line((58,98,72,98),fill=(37,32,48),width=3)
+
+    # Render fine facial surface details at 256px, leaving the original
+    # silhouettes recognizable while avoiding the low-resolution mask look.
+    image=image.resize((256,256),Image.Resampling.LANCZOS)
+    d=ImageDraw.Draw(image)
+    rng=random.Random(8124+sum(map(ord,kind)))
+    if kind=="cave":
+        # Layered iris, uneven light and subtle cracks around the cyclopean eye.
+        for radius,color in [(49,(66,56,32)),(42,(133,118,74)),(31,(204,184,118))]:
+            cx,cy=128,128
+            d.arc((cx-radius*2,cy-radius,cx+radius*2,cy+radius),rng.randrange(70),rng.randrange(200,315),fill=color,width=2)
+        d.ellipse((122,92,137,111),fill=(245,238,206))
+        for i in range(18):
+            a=(i/18)*math.pi*2
+            rad=rng.randrange(33,53)
+            x=128+math.cos(a)*rad*1.22;y=128+math.sin(a)*rad
+            d.line((x,y,x+math.cos(a)*8,y+math.sin(a)*5),
+                   fill=(99,76,46),width=1)
+        for pts in [[(31,81),(43,71),(56,74)],[(202,176),(215,184),(225,181)],[(37,189),(53,184),(60,192)]]:
+            d.line(pts,fill=(99,76,53),width=2)
+    elif kind=="forest":
+        # Bark-mask grain, fine angular cheekbones and small amber catchlights.
+        for i in range(33):
+            x=rng.randrange(62,199);y=rng.randrange(26,226)
+            length=rng.randrange(6,26)
+            d.line((x,y,x+rng.randrange(-7,8),y+length),
+                   fill=rng.choice([(96,89,67),(131,124,90),(166,155,116)]),width=1)
+        d.arc((61,74,122,162),45,155,fill=(58,64,45),width=3)
+        d.arc((140,75,202,162),20,145,fill=(58,64,45),width=3)
+        for p in [(88,118),(169,118)]:
+            d.ellipse((p[0],p[1],p[0]+6,p[1]+9),fill=(255,210,115))
+        d.line(((124,169),(109,192),(133,194)),fill=(64,57,45),width=2)
+    elif kind=="window":
+        # Smooth pale face, faint eye-bag shading and a less perfectly even smile.
+        d.arc((49,89,112,180),10,158,fill=(143,145,146),width=3)
+        d.arc((142,85,214,180),18,150,fill=(143,145,146),width=3)
+        d.arc((40,22,220,239),192,353,fill=(165,164,157),width=3)
+        d.arc((84,184,186,223),5,170,fill=(81,67,71),width=2)
+        d.line(((127,124),(118,165),(141,170)),fill=(122,114,116),width=2)
+        for x,y in [(74,80),(172,82)]:
+            d.ellipse((x,y,x+11,y+11),fill=(246,244,226))
+        for x,y in [(63,165),(192,169),(88,198)]:
+            d.line((x,y,x+8,y+5),fill=(171,162,166),width=1)
+    else:
+        # Apparition: soft ghostly edge highlights and uneven haunted eyes.
+        d.arc((29,21,225,238),190,340,fill=(236,231,248),width=3)
+        d.arc((45,39,209,221),25,148,fill=(148,145,174),width=2)
+        d.line(((110,172),(122,180),(144,174)),fill=(150,147,169),width=2)
+        for x,y in [(72,112),(166,117)]:
+            d.ellipse((x,y,x+9,y+13),fill=(225,219,254))
+        for i in range(9):
+            x=rng.randrange(48,208)
+            y=rng.randrange(165,228)
+            d.line((x,y,x+rng.randrange(-8,9),y+rng.randrange(4,14)),
+                   fill=(164,158,187),width=1)
     return image
 
 
