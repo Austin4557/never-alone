@@ -53,6 +53,8 @@ public final class DoNotHearThemPrototype implements ModInitializer {
     private static final Map<UUID, Boolean> SLEEP_STATE = new HashMap<>();
     // Pure 3D segmented bodies; the illustrated sprite is a fallback if 3D spawning fails.
     private static final Map<UUID, List<BodyPart>> BODY_PARTS = new HashMap<>();
+    // Y-axis facing for each active creature; all 3D body pieces rotate as one.
+    private static final Map<UUID, Float> BODY_FACING = new HashMap<>();
     private static final BlockState[][] CREATURE_SURFACES = new BlockState[4][4];
     private MinecraftServer previousServer;
     private int tick;
@@ -191,7 +193,7 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         spawnBody(player, level, location, kind);
         ENCOUNTERS.put(player.getUUID(),new Encounter(kind,level.dimension().identifier().toString(),location,kind==EncounterKind.FOREST?1200:500,0));
         COOLDOWNS.put(player.getUUID(),2400);
-        player.sendSystemMessage(Component.literal("[DNHT v17] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
+        player.sendSystemMessage(Component.literal("[DNHT v18] " + kind.name().toLowerCase() + " stalker spawned to your left. Each type now behaves differently."));
         sendSound(player,level,location);
         render(player,level,ENCOUNTERS.get(player.getUUID()));
         return 1;
@@ -382,48 +384,81 @@ public final class DoNotHearThemPrototype implements ModInitializer {
         };
         return CREATURE_SURFACES[kindIndex][Math.max(0,Math.min(3,material))];
     }
+    private static float facePlayer(ServerPlayer player, Vec3 origin) {
+        Vec3 toPlayer = player.getEyePosition().subtract(origin);
+        // The model's detailed front points toward positive local Z.
+        // Rotate that +Z vector toward the player's horizontal position.
+        return (float) Math.atan2(toPlayer.x, toPlayer.z);
+    }
+
+    private static void poseBodyPart(BodyPart body, Vec3 origin, float facing,
+                                     EncounterKind kind, int elapsed) {
+        Shape shape = body.shape();
+        int motion = shape.motion();
+        double breathe = Math.sin(elapsed * .10) * .028;
+        double armSway = Math.sin(elapsed * .09) * .052;
+        double localX = shape.x() + (motion == 2 ? -armSway : motion == 3 ? armSway : 0);
+        double localY = shape.y()
+            + ((motion == 0 || motion == 1) ? breathe : 0)
+            + (kind == EncounterKind.SLEEP ? Math.sin(elapsed * .056) * .09 : 0);
+        double localZ = shape.z() + (motion == 7
+            ? Math.sin(elapsed * .075 + shape.x() * 4) * .055 : 0);
+        double cos = Math.cos(facing), sin = Math.sin(facing);
+        // Rotate each bone's offset around the creature's shared root.
+        // Rotating only the display texture would leave the parts disconnected.
+        body.entity().setPos(
+            origin.x + localX * cos + localZ * sin,
+            origin.y + localY,
+            origin.z - localX * sin + localZ * cos);
+
+        Quaternionf rotation = new Quaternionf().rotationY(facing).rotateZ(shape.radians());
+        Vector3f halfSize = new Vector3f(-shape.w() / 2, -shape.h() / 2,
+                                       -shape.d() / 2).rotate(rotation);
+        body.entity().setTransformation(new Transformation(
+            halfSize, rotation, new Vector3f(shape.w(), shape.h(), shape.d()),
+            new Quaternionf()));
+    }
+
     private static void spawnBody(ServerPlayer player, ServerLevel level, Vec3 origin, EncounterKind kind) {
         EntityType<?> registeredType = BuiltInRegistries.ENTITY_TYPE.getValue(
             Identifier.fromNamespaceAndPath("minecraft", "block_display"));
         if (registeredType == null) {
-            player.sendSystemMessage(Component.literal("[DNHT v17] 3D display unavailable; sprite mode active."));
+            player.sendSystemMessage(Component.literal("[DNHT v18] 3D display unavailable; sprite mode active."));
             return;
         }
+        float facing = facePlayer(player, origin);
         List<BodyPart> displays = new ArrayList<>();
         for (Shape shape : geometry(kind)) {
             Display.BlockDisplay display = (Display.BlockDisplay) registeredType.create(
                 level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
             if (display == null) continue;
-            display.setBlockState(blockFor(kind,shape.material));
-            display.setPos(origin.x+shape.x,origin.y+shape.y,origin.z+shape.z);
-            display.setTransformation(new Transformation(
-                new Vector3f(-shape.w/2,-shape.h/2,-shape.d/2).rotateZ(shape.radians),
-                new Quaternionf().rotationZ(shape.radians),
-                new Vector3f(shape.w,shape.h,shape.d),
-                new Quaternionf()));
+            display.setBlockState(blockFor(kind, shape.material()));
+            BodyPart part = new BodyPart(display, shape);
+            poseBodyPart(part, origin, facing, kind, 0);
             level.addFreshEntity(display);
-            displays.add(new BodyPart(display,shape));
+            displays.add(part);
         }
-        BODY_PARTS.put(player.getUUID(),displays);
+        BODY_FACING.put(player.getUUID(), facing);
+        BODY_PARTS.put(player.getUUID(), displays);
     }
+
     private static void moveBody(ServerPlayer player, Vec3 origin, EncounterKind kind, int elapsed) {
-        List<BodyPart> parts=BODY_PARTS.get(player.getUUID());
-        if(parts==null)return;
-        float breath=(float)Math.sin(elapsed*.11)*.035f;
-        float sway=(float)Math.sin(elapsed*.09)*.085f;
-        for (BodyPart body : parts) {
-            Shape s=body.shape();
-            int motion=s.motion();
-            double x=origin.x+s.x+(motion==2?-sway:motion==3?sway:0);
-            double y=origin.y+s.y+((motion==0||motion==1)?breath:0)
-                +(kind==EncounterKind.SLEEP?Math.sin(elapsed*.065)*.10:0);
-            double z=origin.z+s.z+((motion==7)?Math.sin(elapsed*.09+s.x*4)*.10:0);
-            body.entity().setPos(x,y,z);
-        }
+        List<BodyPart> parts = BODY_PARTS.get(player.getUUID());
+        if (parts == null || parts.isEmpty()) return;
+        float current = BODY_FACING.getOrDefault(player.getUUID(), facePlayer(player, origin));
+        float desired = facePlayer(player, origin);
+        // Shortest angular path; avoid instant spins when the player runs around it.
+        float difference = (float) Math.atan2(Math.sin(desired-current), Math.cos(desired-current));
+        float turn = Math.max(-.12f, Math.min(.12f, difference));
+        float facing = current + turn;
+        BODY_FACING.put(player.getUUID(), facing);
+        for (BodyPart part : parts) poseBodyPart(part, origin, facing, kind, elapsed);
     }
+
     private static void clearBody(UUID id) {
-        List<BodyPart> parts=BODY_PARTS.remove(id);
-        if(parts!=null)for(BodyPart part:parts)part.entity().discard();
+        BODY_FACING.remove(id);
+        List<BodyPart> parts = BODY_PARTS.remove(id);
+        if (parts != null) for (BodyPart part : parts) part.entity().discard();
     }
 
     private static void render(ServerPlayer player, ServerLevel level, Encounter encounter) {
