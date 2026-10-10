@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "donothearthemprototype",
+  "version": "0.12.0-fabric26.2-v20",
+  "name": "Do Not Hear Them — Fabric Encounter Prototype",
+  "description": "Four original 3D stalkers with detailed 256px body and face materials, animated blinks, linked eye geometry, and polished connected idle motion.",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.port.donothearthem.DoNotHearThemPrototype"
+    ],
+    "client": [
+      "dev.port.donothearthem.DoNotHearThemClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "26.2",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
