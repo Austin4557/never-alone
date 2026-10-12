@@ -1,0 +1,20 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All rights reserved - private personal modpack project"
+[[mods]]
+modId="never_alone"
+version="0.7.0-forge1201-test"
+displayName="Never Alone — Armor and Commands (Forge Stage 7 Test)"
+description="Forge 1.20.1 source build: custom armor, named cat egg commands, non-destructive test scares, opt-in ambient director, and additive Nether Fortress egg loot. Advanced stalker/event systems WIP."
+[[dependencies.never_alone]]
+modId="forge"
+mandatory=true
+versionRange="[47.4.10,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.never_alone]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="BOTH"

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "R R",
+    "RRR",
+    "RRR"
+  ],
+  "key": {
+    "R": {
+      "item": "never_alone:resonant_emerald"
+    }
+  },
+  "result": {
+    "item": "never_alone:emerald_warden_chestplate",
+    "count": 1
+  }
+}

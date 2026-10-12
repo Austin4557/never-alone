@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "D D",
+    "DDD",
+    "DDD"
+  ],
+  "key": {
+    "D": {
+      "item": "never_alone:dark_amethyst_crystal"
+    }
+  },
+  "result": {
+    "item": "never_alone:dark_amethyst_chestplate",
+    "count": 1
+  }
+}

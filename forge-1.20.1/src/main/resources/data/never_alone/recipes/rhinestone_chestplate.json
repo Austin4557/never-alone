@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "R R",
+    "RRR",
+    "RRR"
+  ],
+  "key": {
+    "R": {
+      "item": "never_alone:radiant_rhinestone"
+    }
+  },
+  "result": {
+    "item": "never_alone:rhinestone_chestplate",
+    "count": 1
+  }
+}

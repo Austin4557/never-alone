@@ -1,0 +1,28 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+group = 'com.neveralone.forge'
+version = '0.7.0-forge1201-test'
+base { archivesName = 'NeverAloneForge' }
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        client { workingDirectory project.file('run'); mods { never_alone { source sourceSets.main } } }
+        server { workingDirectory project.file('run'); mods { never_alone { source sourceSets.main } } }
+    }
+}
+repositories { }
+dependencies { minecraft 'net.minecraftforge:forge:1.20.1-47.4.10' }
+
+jar {
+    manifest { attributes([ 'Specification-Title': 'Never Alone Forge', 'Specification-Version': '1',
+                             'Implementation-Title': project.name, 'Implementation-Version': project.version ]) }
+    finalizedBy 'reobfJar'
+}

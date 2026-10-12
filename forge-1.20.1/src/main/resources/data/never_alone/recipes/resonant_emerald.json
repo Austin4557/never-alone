@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "EOE",
+    "OXO",
+    "EOE"
+  ],
+  "key": {
+    "E": {
+      "item": "minecraft:emerald"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "X": {
+      "item": "minecraft:echo_shard"
+    }
+  },
+  "result": {
+    "item": "never_alone:resonant_emerald",
+    "count": 4
+  }
+}
