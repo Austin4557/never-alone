@@ -1,30 +1,28 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
-version = project.mod_version
-group = project.group
-base { archivesName = project.archives_base_name }
-loom {
-    splitEnvironmentSourceSets()
-    mods {
-        "never_alone" {
-            sourceSet sourceSets.main
-            sourceSet sourceSets.client
-        }
+
+group = 'com.neveralone.forge'
+version = '0.8.0-forge1201-armorfix'
+base { archivesName = 'NeverAloneForge' }
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        client { workingDirectory project.file('run'); mods { never_alone { source sourceSets.main } } }
+        server { workingDirectory project.file('run'); mods { never_alone { source sourceSets.main } } }
     }
 }
-dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-}
-processResources {
-    inputs.property "version", project.version
-    filesMatching("fabric.mod.json") { expand "version": project.version }
-}
-tasks.withType(JavaCompile).configureEach { it.options.release = 25 }
-java {
-    withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+repositories { }
+dependencies { minecraft 'net.minecraftforge:forge:1.20.1-47.4.10' }
+
+jar {
+    manifest { attributes([ 'Specification-Title': 'Never Alone Forge', 'Specification-Version': '1',
+                             'Implementation-Title': project.name, 'Implementation-Version': project.version ]) }
+    finalizedBy 'reobfJar'
 }
