@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.neveralone.forge'
-version = '0.8.0-forge1201-armorfix'
+version = '0.9.0-forge1201-visual'
 base { archivesName = 'NeverAloneForge' }
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 

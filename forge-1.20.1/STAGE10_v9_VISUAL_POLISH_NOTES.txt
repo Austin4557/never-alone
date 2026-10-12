@@ -1,0 +1,18 @@
+NEVER ALONE FORGE 1.20.1 v9 — VERIFICATION
+
+WORKING BASELINE: Stage 9 Forge JAR + v8 named-cat pack.
+
+PACK: Single standalone combined cat/armor pack, with correct 1.20.1 pack_format=15.
+44 cat texture files: only mouth-area pixels updated, variants 2-5 across all 11 vanilla coats.
+Oscar cat5.jem: only the body attachment changed; approved head, tail and all other cats unchanged.
+Six worn armor atlases copied from working Stage 9 JAR and color-polished; alpha masks pixel-identical.
+Existing cat egg inventory model and all four icons byte-identical to v8.
+All original cat pack filenames retained; pack adds six armor layers, no removals.
+Texture polish adds painted metallic shine; actual dynamic specular reflections depend on shader/material support.
+Cat and armor texture UV previews represent actual assets; Oscar side diagram is schematic, not an in-game render.
+
+TEST CHECKLIST (not possible offline):
+Test Oscar side while walking and sitting, check 4 cat mouths at gameplay distance, and examine armor under sunlight.
+Confirm v9 pack enabled ABOVE mod resources, no v8/v7 duplicate enabled.
+Only one Never Alone JAR installed; verify all /na armor equip commands and egg icons.
+If problems occur, disable v9 pack and re-enable v8 pack; keep last working Stage 9 JAR.
